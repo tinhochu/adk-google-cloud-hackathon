@@ -1,0 +1,35 @@
+name: creatorcompanion
+
+keys: false
+
+proxy:
+  app:
+    - api.creatorcompanion.local.host:8000
+
+services:
+  # redis:
+  #   type: redis:7
+  #   portforward: 6379
+  # mongo:
+  #   type: mongo:4.4
+  #   portforward: 27017
+  app:
+    type: python
+    scanner: false
+    moreHttpPorts:
+      - "8000"
+    overrides:
+      ports:
+        - 8000:8000
+    build:
+      - pip install --upgrade pip
+      - pip install -r ./back_end/requirements.txt
+    command: uvicorn back_end.main:app --host 0.0.0.0 --port 8000 --reload
+
+tooling:
+  pip:
+    service: app
+    cmd: pip
+  dev:
+    service: app
+    cmd: uvicorn back_end.main:app --host 0.0.0.0 --port 8000 --reload
