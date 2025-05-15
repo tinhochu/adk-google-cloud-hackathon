@@ -27,7 +27,6 @@ services:
     build:
       - pip install --upgrade pip
       - pip install -r ./back_end/requirements.txt
-    command: uvicorn back_end.main:app --host 0.0.0.0 --port 8000 --reload
 
 tooling:
   pip:
@@ -35,7 +34,10 @@ tooling:
     cmd: pip
   dev:
     service: app
-    cmd: uvicorn back_end.main:app --host 0.0.0.0 --port 8000 --reload
+    cmd: uvicorn back_end.api:app --host 0.0.0.0 --port 8000 --reload
   celery:
     service: app
     cmd: celery -A back_end.celery_app worker --loglevel=info
+  adk:
+    service: app
+    cmd: adk web

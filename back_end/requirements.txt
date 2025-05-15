@@ -5,3 +5,4 @@ celery>=5.2.0
 redis
 google-adk
 python-dotenv
+mcp
