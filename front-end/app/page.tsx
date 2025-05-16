@@ -1,103 +1,104 @@
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Mic, Clipboard, Plus, Brain } from "lucide-react";
 
-export default function Home() {
+export default function Dashboard() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      {/* Header */}
+      <header className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold">CreatorCompanion</h1>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" className="font-medium">
+            My Ideas
+          </Button>
+          <Button className="gap-2">
+            <Plus size={16} />
+            New Idea
+            <span className="ml-1 h-2 w-2 rounded-full bg-green-500"></span>
+          </Button>
+        </div>
+      </header>
+
+      {/* Welcome Section */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-medium mb-6">Hello, Creator 👋 What would you like to work on today?</h2>
+        <div className="flex flex-wrap gap-4">
+          <Button size="lg" className="gap-2">
+            <Mic size={18} />
+            Record Idea
+          </Button>
+          <Button size="lg" variant="outline" className="gap-2">
+            <Clipboard size={18} />
+            Paste Idea
+          </Button>
+        </div>
+      </section>
+
+      {/* Content Ideas Section */}
+      <section>
+        <h2 className="text-xl font-medium mb-4 pb-2 border-b">📁 Your Content Ideas</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Content Idea Card 1 */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Brain className="text-purple-500" />
+                  Dopamine Detox Debunked
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <p className="text-muted-foreground">"POV: You're 19..."</p>
+            </CardContent>
+            <CardFooter className="flex justify-between pt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>🕒 2 min ago</span>
+                <span>|</span>
+                <Badge variant="outline">TikTok</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="success" className="bg-green-500 hover:bg-green-600">
+                  ✅ Ready
+                </Badge>
+                <Badge variant="outline">🎬 Script/Caption</Badge>
+              </div>
+            </CardFooter>
+          </Card>
+
+          {/* Content Idea Card 2 */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Brain className="text-purple-500" />
+                  Burnout Recovery
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="pb-2">
+              <p className="text-muted-foreground">"Why hustle culture is..."</p>
+            </CardContent>
+            <CardFooter className="flex justify-between pt-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span>🕒 Yesterday</span>
+                <span>|</span>
+                <Badge variant="outline">YouTube</Badge>
+              </div>
+              <div className="flex items-center gap-2">
+                <Badge variant="success" className="bg-green-500 hover:bg-green-600">
+                  ✅ Ready
+                </Badge>
+                <Badge variant="outline">📈 +5 Likes</Badge>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+      </section>
     </div>
   );
 }

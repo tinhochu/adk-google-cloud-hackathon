@@ -1,19 +1,10 @@
 import os
-import sys
-import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from google.adk.cli.fast_api import get_fast_api_app
-from dotenv import load_dotenv
-
-from mcp import types as mcp_types
-from mcp.server.lowlevel import Server
-from mcp.server.models import InitializationOptions
-import mcp.server.stdio
-import json
-import asyncio
-from google.adk.tools.function_tool import FunctionTool
-from google.adk.tools.mcp_tool.conversion_utils import adk_to_mcp_tool_type
-
+from pydantic import BaseModel
+from .multi_tool_agent.agent import root_agent  # Adjust import as needed
+from celery.result import AsyncResult
+from back_end.tasks import run_agent_task
 
 # Set up paths
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -27,89 +18,42 @@ app: FastAPI = get_fast_api_app(
     agent_dir=AGENT_DIR,
     session_db_url=SESSION_DB_URL,
     allow_origins=["*"],  # In production, restrict this
-    web=True,  # Enable the ADK Web UI
+    web=False,  # Enable the ADK Web UI
 )
 
-# Add custom endpoints
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+# Define your request/response models
+class AgentInput(BaseModel):
+    app_name: str
+    user_id: str
+    session_id: str
+    new_message: str
 
-@app.get("/agent-info")
-async def agent_info():
-    """Provide agent information"""
-    from multi_tool_agent import root_agent
+class AgentOutput(BaseModel):
+    response: str
 
-    return {
-        "agent_name": root_agent.name,
-        "description": root_agent.description,
-        "model": root_agent.model,
-        "tools": [t.__name__ for t in root_agent.tools]
-    }
+class TaskCreateInput(BaseModel):
+    new_message: str
 
+class TaskCreateOutput(BaseModel):
+    task_id: str
 
-def create_mcp_server():
-    """Creates an MCP server exposing our agent's tools."""
-    from multi_tool_agent.agent import get_weather, get_current_time
+class TaskResultOutput(BaseModel):
+    status: str
+    result: str | None = None
 
-    # Wrap functions in FunctionTool objects
-    weather_tool = FunctionTool(get_weather)
-    time_tool = FunctionTool(get_current_time)
+@app.post("/run", response_model=AgentOutput)
+async def run_agent(input: AgentInput):
+    # Use input.new_message as the user input
+    result = root_agent.run(input.new_message)
+    return AgentOutput(response=result)
 
-    # Create MCP Server
-    app = Server("weather-time-mcp-server")
+@app.post("/queue_task", response_model=TaskCreateOutput)
+async def queue_task(input: TaskCreateInput):
+    task = run_agent_task.delay(input.new_message)
+    return TaskCreateOutput(task_id=task.id)
 
-    @app.list_tools()
-    async def list_tools() -> list[mcp_types.Tool]:
-        """List available tools."""
-        # Convert ADK tools to MCP format
-        mcp_tools = [
-            adk_to_mcp_tool_type(weather_tool),
-            adk_to_mcp_tool_type(time_tool)
-        ]
-        return mcp_tools
-
-    @app.call_tool()
-    async def call_tool(name: str, arguments: dict) -> list[mcp_types.TextContent]:
-        """Execute a tool call."""
-        # Map tool names to functions
-        tools = {
-            weather_tool.name: weather_tool,
-            time_tool.name: time_tool
-        }
-
-        if name in tools:
-            try:
-                # Execute the tool
-                result = await tools[name].run_async(
-                    args=arguments,
-                    tool_context=None,
-                )
-                return [mcp_types.TextContent(type="text", text=json.dumps(result))]
-            except Exception as e:
-                return [mcp_types.TextContent(
-                    type="text", 
-                    text=json.dumps({"error": str(e)})
-                )]
-        else:
-            return [mcp_types.TextContent(
-                type="text", 
-                text=json.dumps({"error": f"Tool '{name}' not found"})
-            )]
-
-    return app
-
-async def run_mcp_server():
-    """Run the MCP server over standard I/O."""
-    app = create_mcp_server()
-
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name=app.name,
-                server_version="0.1.0",
-                capabilities=app.get_capabilities(),
-            ),
-        )
+@app.get("/task_result/{task_id}", response_model=TaskResultOutput)
+async def get_task_result(task_id: str):
+    task = AsyncResult(task_id)
+    result = task.result if task.successful() else None
+    return TaskResultOutput(status=task.status, result=result)
