@@ -1,47 +1,53 @@
-"use client";
+'use client'
 
-import type React from "react";
-
-import { useState } from "react";
-import { ArrowLeft, Mic, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { VoiceRecorder } from "@/components/voice-recorder";
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { VoiceRecorder } from '@/components/voice-recorder'
+import { ArrowLeft, Loader2, Mic } from 'lucide-react'
+import Link from 'next/link'
+import { useQueryState } from 'nuqs'
+import type React from 'react'
+import { useState } from 'react'
 
 export default function NewIdeaPage() {
-  const [inputMethod, setInputMethod] = useState<"voice" | "text">("voice");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [inputMethod, setInputMethod] = useQueryState<'voice' | 'text'>('inputMethod', {
+    history: 'replace',
+    shallow: false,
+    defaultValue: 'voice',
+    parse: (v) => (v === 'text' ? 'text' : 'voice'),
+    serialize: (v) => v,
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [agentStatus, setAgentStatus] = useState<{
-    transcription: "pending" | "complete" | "error";
-    scriptAgent: "pending" | "running" | "complete" | "error";
+    transcription: 'pending' | 'complete' | 'error'
+    scriptAgent: 'pending' | 'running' | 'complete' | 'error'
   }>({
-    transcription: "pending",
-    scriptAgent: "pending",
-  });
+    transcription: 'pending',
+    scriptAgent: 'pending',
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+    e.preventDefault()
+    setIsSubmitting(true)
 
     // Simulate agent processing
     setTimeout(() => {
-      setAgentStatus((prev) => ({ ...prev, transcription: "complete" }));
+      setAgentStatus((prev) => ({ ...prev, transcription: 'complete' }))
 
       setTimeout(() => {
-        setAgentStatus((prev) => ({ ...prev, scriptAgent: "running" }));
-      }, 1000);
-    }, 2000);
-  };
+        setAgentStatus((prev) => ({ ...prev, scriptAgent: 'running' }))
+      }, 1000)
+    }, 2000)
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
       {/* Header */}
       <header className="flex items-center justify-between mb-8">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="outline" asChild>
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
@@ -64,24 +70,24 @@ export default function NewIdeaPage() {
           <div className="flex gap-4 mb-4">
             <Button
               type="button"
-              variant={inputMethod === "voice" ? "default" : "outline"}
-              onClick={() => setInputMethod("voice")}
-              className="flex-1"
+              variant={inputMethod === 'voice' ? 'default' : 'outline'}
+              onClick={() => setInputMethod('voice')}
+              className="flex-1 hover:cursor-pointer"
             >
               <Mic className="mr-2 h-4 w-4" />
               Voice Recorder
             </Button>
             <Button
               type="button"
-              variant={inputMethod === "text" ? "default" : "outline"}
-              onClick={() => setInputMethod("text")}
-              className="flex-1"
+              variant={inputMethod === 'text' ? 'default' : 'outline'}
+              onClick={() => setInputMethod('text')}
+              className="flex-1 hover:cursor-pointer"
             >
               Text Input
             </Button>
           </div>
 
-          {inputMethod === "voice" ? (
+          {inputMethod === 'voice' ? (
             <Card>
               <CardContent className="p-6">
                 <VoiceRecorder />
@@ -131,7 +137,7 @@ export default function NewIdeaPage() {
               Processing...
             </>
           ) : (
-            "Submit Idea"
+            'Submit Idea'
           )}
         </Button>
 
@@ -143,7 +149,7 @@ export default function NewIdeaPage() {
             </h3>
             <div className="space-y-2">
               <div className="flex items-center">
-                {agentStatus.transcription === "complete" ? (
+                {agentStatus.transcription === 'complete' ? (
                   <Badge variant="success" className="mr-2">
                     ✅
                   </Badge>
@@ -152,10 +158,10 @@ export default function NewIdeaPage() {
                     ⏳
                   </Badge>
                 )}
-                <span>Transcription {agentStatus.transcription === "complete" ? "complete" : "pending"}</span>
+                <span>Transcription {agentStatus.transcription === 'complete' ? 'complete' : 'pending'}</span>
               </div>
               <div className="flex items-center">
-                {agentStatus.scriptAgent === "running" ? (
+                {agentStatus.scriptAgent === 'running' ? (
                   <Badge variant="outline" className="mr-2 flex items-center">
                     <Loader2 className="h-3 w-3 animate-spin mr-1" />
                   </Badge>
@@ -164,12 +170,12 @@ export default function NewIdeaPage() {
                     ⏳
                   </Badge>
                 )}
-                <span>ScriptAgent {agentStatus.scriptAgent === "running" ? "running..." : "pending"}</span>
+                <span>ScriptAgent {agentStatus.scriptAgent === 'running' ? 'running...' : 'pending'}</span>
               </div>
             </div>
           </div>
         )}
       </form>
     </div>
-  );
+  )
 }

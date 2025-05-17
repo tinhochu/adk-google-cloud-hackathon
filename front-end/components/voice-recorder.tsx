@@ -1,110 +1,110 @@
-"use client";
+'use client'
 
-import { useState, useRef } from "react";
-import { Mic, Square, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { Button } from '@/components/ui/button'
+import { Slider } from '@/components/ui/slider'
+import { Mic, Play, Square } from 'lucide-react'
+import { useRef, useState } from 'react'
 
 export function VoiceRecorder() {
-  const [recording, setRecording] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [recording, setRecording] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const [recordingTime, setRecordingTime] = useState(0)
+  const [playing, setPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
-      mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
+      audioChunksRef.current = []
 
       mediaRecorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
+        audioChunksRef.current.push(event.data)
+      }
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' })
+        const url = URL.createObjectURL(audioBlob)
+        setAudioUrl(url)
 
         // Create audio element for playback
-        const audio = new Audio(url);
-        audioRef.current = audio;
+        const audio = new Audio(url)
+        audioRef.current = audio
 
-        audio.addEventListener("timeupdate", () => {
+        audio.addEventListener('timeupdate', () => {
           if (audio.duration) {
-            setProgress((audio.currentTime / audio.duration) * 100);
+            setProgress((audio.currentTime / audio.duration) * 100)
           }
-        });
+        })
 
-        audio.addEventListener("ended", () => {
-          setPlaying(false);
-          setProgress(0);
-        });
-      };
+        audio.addEventListener('ended', () => {
+          setPlaying(false)
+          setProgress(0)
+        })
+      }
 
-      mediaRecorder.start();
-      setRecording(true);
-      setRecordingTime(0);
+      mediaRecorder.start()
+      setRecording(true)
+      setRecordingTime(0)
 
       // Start timer
       timerRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
+        setRecordingTime((prev) => prev + 1)
+      }, 1000)
     } catch (error) {
-      console.error("Error accessing microphone:", error);
+      console.error('Error accessing microphone:', error)
     }
-  };
+  }
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && recording) {
-      mediaRecorderRef.current.stop();
-      setRecording(false);
+      mediaRecorderRef.current.stop()
+      setRecording(false)
 
       // Stop all tracks on the stream
-      mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
+      mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop())
 
       // Clear timer
       if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
+        clearInterval(timerRef.current)
+        timerRef.current = null
       }
     }
-  };
+  }
 
   const togglePlayback = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current) return
 
     if (playing) {
-      audioRef.current.pause();
-      setPlaying(false);
+      audioRef.current.pause()
+      setPlaying(false)
     } else {
-      audioRef.current.play();
-      setPlaying(true);
+      audioRef.current.play()
+      setPlaying(true)
     }
-  };
+  }
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  };
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`
+  }
 
   const handleSliderChange = (value: number[]) => {
-    if (!audioRef.current) return;
+    if (!audioRef.current) return
 
-    const newPosition = value[0];
-    setProgress(newPosition);
+    const newPosition = value[0]
+    setProgress(newPosition)
 
     if (audioRef.current.duration) {
-      audioRef.current.currentTime = (newPosition / 100) * audioRef.current.duration;
+      audioRef.current.currentTime = (newPosition / 100) * audioRef.current.duration
     }
-  };
+  }
 
   return (
     <div className="flex flex-col items-center">
@@ -123,7 +123,7 @@ export function VoiceRecorder() {
               <Button
                 variant="destructive"
                 size="lg"
-                className="rounded-full h-16 w-16 flex items-center justify-center"
+                className="rounded-full h-16 w-16 flex items-center justify-center hover:cursor-pointer"
                 onClick={stopRecording}
               >
                 <Square className="h-6 w-6" />
@@ -132,7 +132,7 @@ export function VoiceRecorder() {
               <Button
                 variant="outline"
                 size="lg"
-                className="rounded-full h-16 w-16 flex items-center justify-center border-2 border-primary hover:bg-primary hover:text-primary-foreground"
+                className="rounded-full h-16 w-16 flex items-center justify-center border-2 border-primary hover:bg-primary hover:text-primary-foreground hover:cursor-pointer"
                 onClick={startRecording}
               >
                 <Mic className="h-6 w-6" />
@@ -162,12 +162,12 @@ export function VoiceRecorder() {
             <Button
               variant="ghost"
               size="sm"
-              className="h-auto p-0 text-sm text-primary"
+              className="h-auto p-0 text-sm text-primary hover:cursor-pointer"
               onClick={() => {
-                setAudioUrl(null);
-                setProgress(0);
+                setAudioUrl(null)
+                setProgress(0)
                 if (audioRef.current) {
-                  audioRef.current.pause();
+                  audioRef.current.pause()
                 }
               }}
             >
@@ -177,5 +177,5 @@ export function VoiceRecorder() {
         </div>
       )}
     </div>
-  );
+  )
 }
