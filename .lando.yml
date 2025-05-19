@@ -40,4 +40,4 @@ tooling:
     cmd: python -m back_end.tasks.watcher
   adk:
     service: app
-    cmd: adk web
+    cmd: adk

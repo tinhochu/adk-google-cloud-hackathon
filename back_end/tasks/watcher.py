@@ -1,5 +1,6 @@
 import os
 from pymongo import MongoClient
+from back_end.multi_tool_agent import creator_companion
 from bson.objectid import ObjectId
 
 # Load environment variables
@@ -12,12 +13,43 @@ ideas_collection = db["ideas"]
 
 def process_idea(task_id):
     print(f"⚡ Processing idea: {task_id}")
-    # Trigger your agent here:
-    # script_agent.delay(task_id)
+
+    # Fetch the document
+    idea = ideas_collection.find_one({"_id": ObjectId(task_id)})
+    if not idea:
+        print("❌ Idea not found.")
+        return
+
+    context = idea.get("context", {})
+    
+    # Set to processing
     ideas_collection.update_one(
         {"_id": ObjectId(task_id)},
         {"$set": {"status": "processing"}}
     )
+
+    try:
+        # Run multi-agent pipeline (ADK SequentialAgent)
+        result = creator_companion_agent.create_session(``)
+
+        # Save results
+        ideas_collection.update_one(
+            {"_id": ObjectId(task_id)},
+            {
+                "$set": {
+                    "status": "completed",
+                    "results": result
+                }
+            }
+        )
+        print("✅ Task completed.")
+    except Exception as e:
+        print(f"❌ Error while running agent: {e}")
+        ideas_collection.update_one(
+            {"_id": ObjectId(task_id)},
+            {"$set": {"status": "error", "error_message": str(e)}}
+        )
+
 
 def process_existing_queued_ideas():
     print("🔁 Checking for existing queued ideas...")
