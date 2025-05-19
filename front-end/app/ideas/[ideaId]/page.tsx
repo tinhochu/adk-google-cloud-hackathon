@@ -27,7 +27,6 @@ export default async function IdeaDetailsPage({ params }: IdeaDetailsPageProps) 
   // Get the ideaId from the URL
   const { ideaId } = await params
   const ideaData = await getIdea(ideaId)
-  console.log('ideaData', ideaData)
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-3xl">
