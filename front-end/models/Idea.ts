@@ -4,17 +4,27 @@ import toJSON from './plugins/toJSON'
 
 export const ideaSchema = new mongoose.Schema(
   {
-    title: {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    prompt: {
       type: String,
       required: true,
     },
-    description: {
+    platform: {
+      type: String,
+      required: true,
+    },
+    tone: {
       type: String,
       required: true,
     },
     status: {
       type: String,
-      required: true,
+      enum: ['pending', 'processing', 'completed', 'failed'],
+      default: 'pending',
     },
     createdAt: {
       type: Date,
@@ -23,11 +33,6 @@ export const ideaSchema = new mongoose.Schema(
     updatedAt: {
       type: Date,
       default: Date.now,
-    },
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
     },
   },
   {

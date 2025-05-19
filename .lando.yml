@@ -13,9 +13,6 @@ services:
   redis:
     type: redis:7
     portforward: 6379
-  mongo:
-    type: mongo:4.4
-    portforward: 27017
   app:
     type: python:3.10
     scanner: false
@@ -37,7 +34,10 @@ tooling:
     cmd: uvicorn back_end.api:app --host 0.0.0.0 --port 8000 --reload
   celery:
     service: app
-    cmd: celery -A back_end.celery_app worker --loglevel=info
+    cmd: celery -A back_end.tasks.watcher worker --loglevel=info
+  watcher:
+    service: app
+    cmd: python -m back_end.tasks.watcher
   adk:
     service: app
     cmd: adk web

@@ -1,18 +1,26 @@
 'use client'
 
+import { createIdeaAction } from '@/actions/create-idea.action'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { VoiceRecorder } from '@/components/voice-recorder'
+import { TONES } from '@/constants'
+import { useUser } from '@clerk/nextjs'
 import { ArrowLeft, Loader2, Mic } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import type React from 'react'
-import { useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 export default function NewIdeaPage() {
+  const { user } = useUser()
+  const router = useRouter()
+  const [formState, formAction, pending] = useActionState(createIdeaAction, { message: '' })
   const [inputMethod, setInputMethod] = useQueryState<'voice' | 'text'>('inputMethod', {
     history: 'replace',
     shallow: false,
@@ -28,20 +36,19 @@ export default function NewIdeaPage() {
     transcription: 'pending',
     scriptAgent: 'pending',
   })
+  const [textValue, setTextValue] = useState<string>('')
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [tone, setTone] = useState<string>('')
+  const [platform, setPlatform] = useState<string>('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate agent processing
-    setTimeout(() => {
-      setAgentStatus((prev) => ({ ...prev, transcription: 'complete' }))
-
-      setTimeout(() => {
-        setAgentStatus((prev) => ({ ...prev, scriptAgent: 'running' }))
-      }, 1000)
-    }, 2000)
-  }
+  useEffect(() => {
+    if (formState.status === 'success') {
+      toast.success(formState.message)
+      router.push(`/ideas/${formState.idea.id}`)
+    } else if (formState.status === 'error') {
+      toast.error(formState.message)
+    }
+  }, [formState.status, user, router])
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl">
@@ -59,7 +66,11 @@ export default function NewIdeaPage() {
         <div className="w-20"></div> {/* Spacer for centering */}
       </header>
 
-      <form onSubmit={handleSubmit}>
+      <form action={formAction}>
+        <input type="hidden" name="userId" value={user?.id ?? ''} />
+        <input type="hidden" name="prompt" value={textValue} />
+        <input type="hidden" name="platform" value={platform} />
+        <input type="hidden" name="tone" value={tone} />
         {/* Step Indicator */}
         <div className="mb-6">
           <h2 className="text-lg font-medium">Step 1: Record or paste your idea</h2>
@@ -90,11 +101,21 @@ export default function NewIdeaPage() {
           {inputMethod === 'voice' ? (
             <Card>
               <CardContent className="p-6">
-                <VoiceRecorder />
+                <VoiceRecorder
+                  setTextValue={setTextValue}
+                  textValue={textValue}
+                  isTranscribing={isTranscribing}
+                  setIsTranscribing={setIsTranscribing}
+                />
               </CardContent>
             </Card>
           ) : (
-            <Textarea placeholder="Paste your content idea here..." className="min-h-[150px]" />
+            <Textarea
+              placeholder="Paste your content idea here..."
+              className="min-h-[150px]"
+              value={textValue}
+              onChange={(e) => setTextValue(e.target.value)}
+            />
           )}
         </div>
 
@@ -103,26 +124,39 @@ export default function NewIdeaPage() {
           <h3 className="text-sm font-medium text-muted-foreground mb-3">Optional:</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Select>
-                <SelectTrigger>
+              <Select onValueChange={(value) => setPlatform(value)} name="platform">
+                <SelectTrigger className="hover:cursor-pointer w-full">
                   <SelectValue placeholder="Platform" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                  <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="youtube">YouTube Shorts</SelectItem>
+                  <SelectItem value="tiktok">
+                    <div className="flex items-center gap-2">
+                      <img src="/tiktok.svg" alt="TikTok" className="w-4 h-4" />
+                      TikTok
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="instagram">
+                    <img src="/instagram.svg" alt="Instagram" className="w-4 h-4" />
+                    Instagram
+                  </SelectItem>
+                  <SelectItem value="youtube">
+                    <img src="/youtube.svg" alt="YouTube" className="w-4 h-4" />
+                    YouTube Shorts
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Select>
-                <SelectTrigger>
+              <Select onValueChange={(value) => setTone(value)} name="tone">
+                <SelectTrigger className="hover:cursor-pointer w-full">
                   <SelectValue placeholder="Tone" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="funny">Funny, Gen Z</SelectItem>
-                  <SelectItem value="motivational">Motivational</SelectItem>
-                  <SelectItem value="educational">Educational</SelectItem>
+                  {TONES.map(({ value, label }) => (
+                    <SelectItem value={value} key={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -130,7 +164,12 @@ export default function NewIdeaPage() {
         </div>
 
         {/* Submit Button */}
-        <Button type="submit" size="lg" className="w-full mb-8" disabled={isSubmitting}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full mb-8 hover:cursor-pointer"
+          disabled={isSubmitting || textValue.trim() === ''}
+        >
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
