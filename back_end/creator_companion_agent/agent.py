@@ -1,14 +1,13 @@
-from google.adk.agents import Agent
+from google.adk.agents import LlmAgent
 from . import prompt
-from .sub_agents.script_agent import script_agent
+from .sub_agents.sequential_agent import sequential_agent
 
-# Optional: More agents like TrendHunterAgent or PostScheduler
-
-# Full pipeline
-root_agent = Agent(
+creator_companion_agent = LlmAgent(
     model="gemini-2.0-flash",
-    name="CreatorCompanionPipeline",
-    description="Executes a sequence of agents to generate a script and caption for a social media post.",
+    name="CreatorCompanionAgent",
     instruction=prompt.ROOT_PROMPT,
-    sub_agents=[script_agent],
+    sub_agents=[sequential_agent],
+    output_key="content_package",
 )
+
+root_agent = creator_companion_agent

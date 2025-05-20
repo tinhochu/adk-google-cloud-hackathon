@@ -25,7 +25,7 @@ export async function createIdeaAction(prevState: any, formData: FormData) {
       userId: user._id,
       platform,
       tone,
-      prompt,
+      prompt: `${prompt}. This will go on ${platform}. Make it sound ${tone}`,
     })
 
     const idea = ideaObject.toJSON()

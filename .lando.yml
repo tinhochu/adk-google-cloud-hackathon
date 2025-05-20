@@ -10,9 +10,9 @@ proxy:
     - api.creatorcompanion.local.host:8000
 
 services:
-  redis:
-    type: redis:7
-    portforward: 6379
+  # redis:
+  #   type: redis:7
+  #   portforward: 6379
   app:
     type: python:3.10
     scanner: false

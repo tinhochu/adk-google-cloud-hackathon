@@ -6,3 +6,4 @@ redis
 google-adk
 python-dotenv
 mcp
+requests
