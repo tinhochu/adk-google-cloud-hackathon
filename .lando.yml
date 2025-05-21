@@ -5,10 +5,6 @@ keys: false
 env_file:
   - .env
 
-proxy:
-  app:
-    - api.creatorcompanion.local.host:8000
-
 services:
   # redis:
   #   type: redis:7

@@ -9,5 +9,5 @@ script_agent = LlmAgent(
     name="ScriptAgent",
     description="Generates a 60-second script for a social media post",
     instruction=prompt.SCRIPT_PROMPT,
-    output_key="script",
+    output_key="generated_script",
 )

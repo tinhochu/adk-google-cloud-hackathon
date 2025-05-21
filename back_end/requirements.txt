@@ -3,7 +3,6 @@ uvicorn
 pymongo
 celery>=5.2.0
 redis
-google-adk
+google-adk==1.0.0
 python-dotenv
 mcp
-requests

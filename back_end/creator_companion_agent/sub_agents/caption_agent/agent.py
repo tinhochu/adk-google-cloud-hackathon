@@ -9,5 +9,5 @@ caption_agent = LlmAgent(
     name="CaptionAgent",
     description="Generates a caption for a social media post",
     instruction=prompt.CAPTION_PROMPT,
-    output_key="caption"
+    output_key="generated_caption"
 )
