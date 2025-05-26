@@ -15,16 +15,23 @@ export const ideaSchema = new mongoose.Schema(
     },
     platform: {
       type: String,
-      required: true,
     },
     tone: {
       type: String,
-      required: true,
     },
     status: {
       type: String,
       enum: ['pending', 'processing', 'completed', 'failed'],
       default: 'pending',
+    },
+    generated_script: {
+      type: String,
+    },
+    generated_caption: {
+      type: String,
+    },
+    generated_music: {
+      type: Array,
     },
     createdAt: {
       type: Date,

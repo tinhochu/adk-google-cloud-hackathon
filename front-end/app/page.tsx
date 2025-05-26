@@ -1,119 +1,153 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { getIdeas } from '@/helpers/getIdeas'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
 import User from '@/models/User'
 import { currentUser } from '@clerk/nextjs/server'
-import { Brain, Clipboard, Mic } from 'lucide-react'
+import { Eye, FileText, Heart, Sparkles, Zap } from 'lucide-react'
 import Link from 'next/link'
 
-const getData = async () => {
-  // Get the current user
-  const user = await currentUser()
+const stats = {
+  totalViews: '2.4M',
+  totalLikes: '156K',
+  totalShares: '23K',
+  engagementRate: '8.2%',
+  contentGenerated: 47,
+  activeIdeas: 12,
+}
 
-  // If the user is not found, return an empty array
-  if (!user) return []
+const platformColors = {
+  tiktok: 'bg-black text-white',
+  instagram: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+  youtube: 'bg-red-600 text-white',
+}
 
-  // Connect to the database
-  await connectMongo()
-
-  // Get the user from the database
-  const mongoUser = await User.findOne({ clerkId: user.id })
-
-  // If the user is not found, return an empty array
-  if (!mongoUser) return []
-
-  // Convert the user to a JSON object
-  const userJSON = mongoUser.toJSON()
-
-  // Get the user's ideas
-  const ideas = await Idea.find({ userId: userJSON.id }).lean()
-
-  return ideas
+const statusColors = {
+  completed: 'bg-green-500',
+  processing: 'bg-yellow-500 animate-pulse',
+  draft: 'bg-gray-500',
 }
 
 export default async function Page() {
-  const ideas = (await getData()) ?? []
+  const ideas = (await getIdeas({ limit: 5 })) ?? []
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      {/* Welcome Section */}
-      <section className="mb-8 max-w-2xl mx-auto">
-        <h2 className="text-2xl font-medium mb-6">Hello, Creator 👋 What would you like to work on today?</h2>
-        <div className="flex flex-wrap gap-4">
-          <Link href="/ideas/new?inputMethod=voice">
-            <Button size="lg" variant="outline" className="gap-2 hover:cursor-pointer">
-              🎙️ Record Idea
-            </Button>
-          </Link>
-          <Link href="/ideas/new?inputMethod=text">
-            <Button size="lg" variant="outline" className="gap-2 hover:cursor-pointer">
-              👨‍💻 Write Idea
-            </Button>
-          </Link>
-        </div>
-      </section>
+    <div className="w-full mx-auto px-4">
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Views</CardTitle>
+            <Eye className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalViews}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+12.5%</span> from last week
+            </p>
+          </CardContent>
+        </Card>
 
-      {/* Content Ideas Section */}
-      <section className="max-w-6xl mx-auto">
-        <h2 className="text-xl font-medium mb-4 pb-2 border-b">📁 Your Content Ideas</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ideas.length > 0 &&
-            ideas.map((idea: any) => (
-              <Card key={idea._id}>
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <Brain className="text-purple-500" />
-                      Dopamine Detox Debunked
-                    </CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <p className="text-muted-foreground">"POV: You're 19..."</p>
-                </CardContent>
-                <CardFooter className="flex justify-between pt-2 text-sm text-muted-foreground">
-                  <div className="flex items-center gap-2">
-                    <span>🕒 2 min ago</span>
-                    <span>|</span>
-                    <Badge variant="outline">TikTok</Badge>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="success" className="bg-green-500 hover:bg-green-600">
-                      ✅ Ready
-                    </Badge>
-                    <Badge variant="outline">🎬 Script/Caption</Badge>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Engagement Rate</CardTitle>
+            <Heart className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.engagementRate}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+2.1%</span> from last week
+            </p>
+          </CardContent>
+        </Card>
 
-          {ideas.length === 0 && (
-            <div className="col-span-2 p-14 bg-muted rounded-lg grid gap-4">
-              <p className="text-center text-2xl text-muted-foreground font-semibold">
-                🤔 No ideas found. Create one to get started 💥.
-              </p>
-              <p className="text-center text-muted-foreground">
-                You can create an 💡idea by clicking the button <span className="text-2xl">👇</span> below or 📋 pasting
-                your idea into the text field.
-              </p>
-              <div className="flex justify-center gap-4">
-                <Link href="/ideas/new?inputMethod=voice">
-                  <Button size="lg" variant="outline" className="gap-2 hover:cursor-pointer">
-                    🎙️ Record Idea
-                  </Button>
-                </Link>
-                <Link href="/ideas/new?inputMethod=text">
-                  <Button size="lg" variant="outline" className="gap-2 hover:cursor-pointer">
-                    👨‍💻 Write Idea
-                  </Button>
-                </Link>
-              </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Content Generated</CardTitle>
+            <Sparkles className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.contentGenerated}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-green-600">+8</span> this week
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Active Ideas</CardTitle>
+            <Zap className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.activeIdeas}</div>
+            <p className="text-xs text-muted-foreground">
+              <span className="text-blue-600">3</span> generating now
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <Card className="lg:col-span-3">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-2xl font-semibold">
+              <FileText className="h-5 w-5" />
+              Recent Content Ideas
+            </CardTitle>
+            <Link href="/ideas">
+              <Button variant="outline" size="sm" className="hover:cursor-pointer">
+                View All
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {ideas.map((idea: any) => (
+                <div key={idea.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-3 w-3 rounded-full ${statusColors[idea.status as keyof typeof statusColors]}`} />
+                    <div className="flex flex-col gap-2">
+                      <div className="font-medium">{idea.prompt}</div>
+                      <div className="text-sm text-muted-foreground flex items-center gap-2">
+                        <Badge
+                          className={`${platformColors[idea?.platform as keyof typeof platformColors]} text-xs font-semibold`}
+                        >
+                          {idea?.platform}
+                        </Badge>
+                        <span>{idea?.createdAt?.toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {idea.status === 'published' && (
+                      <div className="text-right text-sm">
+                        <div className="font-medium">{idea.views}</div>
+                        <div className="text-muted-foreground">{idea.engagement}</div>
+                      </div>
+                    )}
+                    {idea.status === 'scheduled' && (
+                      <div className="text-right text-sm">
+                        <div className="font-medium">Scheduled</div>
+                        <div className="text-muted-foreground">{idea.scheduledFor}</div>
+                      </div>
+                    )}
+                    {idea.status === 'generating' && (
+                      <div className="text-right text-sm w-20">
+                        <div className="font-medium">{idea.progress}%</div>
+                        <Progress value={idea.progress} className="h-2" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      </section>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

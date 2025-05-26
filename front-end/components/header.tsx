@@ -1,19 +1,26 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 import { Skeleton } from '@/components/ui/skeleton'
 import { SignInButton, UserButton, useUser } from '@clerk/nextjs'
-import { Plus, User } from 'lucide-react'
+import { Brain, Plus, User } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Header() {
   const { user, isLoaded } = useUser()
 
   return (
-    <header className="container mx-auto px-4 py-6 max-w-2xl flex items-center justify-between">
+    <header className="mx-auto px-4 py-6 flex items-center w-full justify-between">
       <div className="flex items-center gap-2">
+        <SidebarTrigger className="hover:cursor-pointer" />
         <Link href="/">
-          <h1 className="text-2xl font-bold">CreatorCompanion</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+              <Brain className="h-6 w-6 text-primary-foreground" />
+            </div>
+            CreatorCompanion
+          </h1>
         </Link>
       </div>
       <div className="flex items-center gap-4">

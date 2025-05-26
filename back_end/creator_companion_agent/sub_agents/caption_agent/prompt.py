@@ -15,9 +15,10 @@ Your job is to write a short, attention-grabbing caption that matches the tone o
    - Reflect the topic or hook of the video
    - Tie into current trends, sounds, or formats
 4. Do **not** repeat the entire script. Tease it or add a new angle.
-5. You may use emojis, Gen Z slang, or meme phrasing — but keep it clear and catchy.
+5. You may use slang according to current trends, or meme phrasing — but keep it clear and catchy.
 6. Do not explain your choices or provide formatting instructions.
 7. Return the output in the exact format below.
+8. Do not use emojis.
 
 <Output Format>
 Return only the caption string. nothing else.

@@ -29,7 +29,7 @@ You will receive:
    - Would a creator use this sound as background, intro, punchline, or transition?
 
 4. Compute a `trend_score` for each clip by averaging its `trend` values.
-5. Select the top 3–10 matches using the following priority rules:
+5. Select the top 5–10 matches using the following priority rules:
 
 <Ranking Guidelines>
 - Prioritize audios that:
@@ -41,7 +41,7 @@ You will receive:
 6. For each selected clip, generate a short `reason` explaining why the clip fits the idea/script/tone.
 
 <Final Output Format>
-Return a JSON array (minimum 3 clips, max 10), where each item includes:
+Return a JSON array (minimum 5 clips, max 10), where each item includes:
 ```json
 {
   "clip_id": "<clip_id>",

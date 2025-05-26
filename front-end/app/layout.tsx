@@ -1,6 +1,9 @@
 import { ourFileRouter } from '@/app/api/uploadthing/core'
+import { AppSidebar } from '@/components/app-sidebar'
 import Header from '@/components/header'
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
+import { cn } from '@/lib/utils'
 import { ClerkProvider } from '@clerk/nextjs'
 import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'
 import type { Metadata } from 'next'
@@ -32,27 +35,32 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <NextSSRPlugin
-          /**
-           * The `extractRouterConfig` will extract **only** the route configs
-           * from the router to prevent additional information from being
-           * leaked to the client. The data passed to the client is the same
-           * as if you were to fetch `/api/uploadthing` directly.
-           */
-          routerConfig={extractRouterConfig(ourFileRouter)}
-        />
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <NuqsAdapter>
-            <Suspense>
-              <Header />
-            </Suspense>
-            <main className="container mx-auto px-4 max-w-5xl">{children}</main>
-            <Toaster />
-          </NuqsAdapter>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html>
+      <NuqsAdapter>
+        <ClerkProvider>
+          <NextSSRPlugin
+            /**
+             * The `extractRouterConfig` will extract **only** the route configs
+             * from the router to prevent additional information from being
+             * leaked to the client. The data passed to the client is the same
+             * as if you were to fetch `/api/uploadthing` directly.
+             */
+            routerConfig={extractRouterConfig(ourFileRouter)}
+          />
+          <body className={cn(geistSans.variable, geistMono.variable, 'antialiased')}>
+            <SidebarProvider>
+              <AppSidebar />
+              <main className="flex flex-col w-full">
+                <Suspense>
+                  <Header />
+                </Suspense>
+                {children}
+              </main>
+              <Toaster />
+            </SidebarProvider>
+          </body>
+        </ClerkProvider>
+      </NuqsAdapter>
+    </html>
   )
 }
