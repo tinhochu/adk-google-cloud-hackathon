@@ -3,10 +3,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { getIdeas } from '@/helpers/getIdeas'
-import connectMongo from '@/lib/mongoose'
-import Idea from '@/models/Idea'
-import User from '@/models/User'
-import { currentUser } from '@clerk/nextjs/server'
 import { Eye, FileText, Heart, Sparkles, Zap } from 'lucide-react'
 import Link from 'next/link'
 
@@ -27,6 +23,7 @@ const platformColors = {
 
 const statusColors = {
   completed: 'bg-green-500',
+  pending: 'bg-gray-500',
   processing: 'bg-yellow-500 animate-pulse',
   draft: 'bg-gray-500',
 }
@@ -105,44 +102,48 @@ export default async function Page() {
             </Link>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-4 flex flex-col gap-2">
               {ideas.map((idea: any) => (
-                <div key={idea.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-3 w-3 rounded-full ${statusColors[idea.status as keyof typeof statusColors]}`} />
-                    <div className="flex flex-col gap-2">
-                      <div className="font-medium">{idea.prompt}</div>
-                      <div className="text-sm text-muted-foreground flex items-center gap-2">
-                        <Badge
-                          className={`${platformColors[idea?.platform as keyof typeof platformColors]} text-xs font-semibold`}
-                        >
-                          {idea?.platform}
-                        </Badge>
-                        <span>{idea?.createdAt?.toLocaleDateString()}</span>
+                <Link href={`/ideas/${idea.id}`} key={idea.id}>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`h-3 w-3 rounded-full ${statusColors[idea.status as keyof typeof statusColors]}`}
+                      />
+                      <div className="flex flex-col gap-2">
+                        <div className="font-medium">{idea.prompt}</div>
+                        <div className="text-sm text-muted-foreground flex items-center gap-2">
+                          <Badge
+                            className={`${platformColors[idea?.platform as keyof typeof platformColors]} text-xs font-semibold`}
+                          >
+                            {idea?.platform}
+                          </Badge>
+                          <span>{idea?.createdAt?.toLocaleDateString()}</span>
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      {idea.status === 'published' && (
+                        <div className="text-right text-sm">
+                          <div className="font-medium">{idea.views}</div>
+                          <div className="text-muted-foreground">{idea.engagement}</div>
+                        </div>
+                      )}
+                      {idea.status === 'scheduled' && (
+                        <div className="text-right text-sm">
+                          <div className="font-medium">Scheduled</div>
+                          <div className="text-muted-foreground">{idea.scheduledFor}</div>
+                        </div>
+                      )}
+                      {idea.status === 'generating' && (
+                        <div className="text-right text-sm w-20">
+                          <div className="font-medium">{idea.progress}%</div>
+                          <Progress value={idea.progress} className="h-2" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {idea.status === 'published' && (
-                      <div className="text-right text-sm">
-                        <div className="font-medium">{idea.views}</div>
-                        <div className="text-muted-foreground">{idea.engagement}</div>
-                      </div>
-                    )}
-                    {idea.status === 'scheduled' && (
-                      <div className="text-right text-sm">
-                        <div className="font-medium">Scheduled</div>
-                        <div className="text-muted-foreground">{idea.scheduledFor}</div>
-                      </div>
-                    )}
-                    {idea.status === 'generating' && (
-                      <div className="text-right text-sm w-20">
-                        <div className="font-medium">{idea.progress}%</div>
-                        <Progress value={idea.progress} className="h-2" />
-                      </div>
-                    )}
-                  </div>
-                </div>
+                </Link>
               ))}
             </div>
           </CardContent>
