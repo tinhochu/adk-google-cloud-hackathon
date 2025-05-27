@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "concurrently 'next dev --turbopack' 'quirrel'",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -25,7 +25,10 @@
     "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "concurrently": "^9.1.2",
+    "embla-carousel-react": "^8.6.0",
     "lucide-react": "^0.510.0",
+    "mime": "^4.0.7",
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.0",
     "next": "15.3.2",
@@ -33,6 +36,7 @@
     "nuqs": "^2.4.3",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
+    "quirrel": "^1.14.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.3",
@@ -42,7 +46,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^20.17.46",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

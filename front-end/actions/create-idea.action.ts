@@ -1,5 +1,7 @@
 'use server'
 
+import { ideaQueue } from '@/app/api/queues/idea/route'
+import processIdea from '@/helpers/processIdea'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
 import User from '@/models/User'
@@ -28,7 +30,11 @@ export async function createIdeaAction(prevState: any, formData: FormData) {
       prompt: `${prompt}. This will go on ${platform}. Make it sound ${tone}`,
     })
 
+    // convert the idea to a JSON object
     const idea = ideaObject.toJSON()
+
+    // add the idea to the queue
+    await ideaQueue.enqueue(idea)
 
     return {
       message: 'Idea created successfully',
