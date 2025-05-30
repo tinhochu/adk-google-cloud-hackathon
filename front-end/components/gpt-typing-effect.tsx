@@ -2,14 +2,16 @@
 
 import { cn } from '@/lib/utils'
 import React, { useEffect, useState } from 'react'
+import Markdown from 'react-markdown'
 
 interface GPTTypingEffectProps {
   text: string
   typingSpeed?: number
   className?: string
+  isMarkdown?: boolean
 }
 
-const GPTTypingEffect: React.FC<GPTTypingEffectProps> = ({ text, typingSpeed = 20, className }) => {
+const GPTTypingEffect: React.FC<GPTTypingEffectProps> = ({ text, typingSpeed = 20, className, isMarkdown = false }) => {
   const [displayedText, setDisplayedText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -24,7 +26,7 @@ const GPTTypingEffect: React.FC<GPTTypingEffectProps> = ({ text, typingSpeed = 2
     }
   }, [currentIndex, text, typingSpeed])
 
-  return <p className={cn('', className)}>{displayedText}</p>
+  return <p className={cn('', className)}>{isMarkdown ? <Markdown>{displayedText}</Markdown> : displayedText}</p>
 }
 
 export default GPTTypingEffect

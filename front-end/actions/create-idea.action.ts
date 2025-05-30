@@ -1,7 +1,6 @@
 'use server'
 
 import { ideaQueue } from '@/app/api/queues/idea/route'
-import processIdea from '@/helpers/processIdea'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
 import User from '@/models/User'
@@ -27,7 +26,7 @@ export async function createIdeaAction(prevState: any, formData: FormData) {
       userId: user._id,
       platform,
       tone,
-      prompt: `${prompt}. This will go on ${platform}. Make it sound ${tone}`,
+      prompt: `${prompt}. ${!tone || !platform ? 'Inherit the tone and platform from the prompt. and if its not available, make it sound like a normal video.' : `This will go on ${platform}. Make it sound ${tone}`}`,
     })
 
     // convert the idea to a JSON object

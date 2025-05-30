@@ -19,5 +19,7 @@ Combine the data into a well-formatted JSON object with the following top-level 
      - `link`
      - `country_code`
      - `cover`
+     - `duration`
+     - `trend_score`
      - `reason`
 """

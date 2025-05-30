@@ -1,5 +1,7 @@
 'use client'
 
+import AudioWave from '@/components/audio-wave'
+import GPTTypingEffect from '@/components/gpt-typing-effect'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { useUploadThing } from '@/hooks/use-uploadthing'
@@ -7,8 +9,6 @@ import apiClient from '@/lib/apiClient'
 import { useUser } from '@clerk/nextjs'
 import { Mic, Play, QuoteIcon, Square } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-
-import GPTTypingEffect from './gpt-typing-effect'
 
 export function VoiceRecorder({
   setTextValue,
@@ -170,7 +170,11 @@ export function VoiceRecorder({
 
   return (
     <div className="flex flex-col items-center">
-      {isProcessing && <div className="mb-4 text-center text-blue-500 animate-pulse">Processing audio...</div>}
+      {isProcessing && (
+        <div className="mb-4 text-center text-blue-500 animate-pulse">
+          <AudioWave />
+        </div>
+      )}
       {!audioUrl ? (
         <>
           <div className="text-center mb-4">
