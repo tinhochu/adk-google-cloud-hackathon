@@ -25,8 +25,10 @@ export default async function IdeasPage() {
           ideas?.map((idea: any, index: number) => (
             <Card key={idea.id}>
               <CardHeader>
-                <CardTitle className="relative">
-                  <Link href={`/ideas/${idea.id}`}>{idea.prompt}</Link>
+                <CardTitle className="relative pr-48">
+                  <Link href={`/ideas/${idea.id}`} className="hover:cursor-pointer leading-relaxed hover:underline">
+                    {idea.prompt}
+                  </Link>
                   <DropdownMenu>
                     <DropdownMenuTrigger className="absolute top-0 right-2" asChild>
                       <Button className="hover:cursor-pointer">Actions</Button>

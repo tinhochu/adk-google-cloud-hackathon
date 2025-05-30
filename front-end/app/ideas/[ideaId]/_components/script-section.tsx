@@ -2,14 +2,12 @@ import GPTTypingEffect from '@/components/gpt-typing-effect'
 import { MusicPlayer } from '@/components/music-player'
 import PhoneSimulator from '@/components/phone-simulator'
 import PromptUpdater from '@/components/prompt-updater'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { GoogleGenAI } from '@google/genai'
-import { Pencil } from 'lucide-react'
-import { Suspense } from 'react'
+import { Loader2 } from 'lucide-react'
 
-import { Caption, CaptionLoading } from './caption'
-import { MusicSection } from './music-section'
+import { Caption } from './caption'
 
 const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_GEMINI_API_KEY })
 
@@ -51,6 +49,44 @@ function ScriptSectionLoading({ idea }: { idea: any }) {
         </Card>
 
         <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>
+              <Skeleton className="w-full h-10" />
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="grid grid-cols-4 gap-4">
+            {/* Left Section - Album Art and Controls */}
+            <div className="col-span-1 flex flex-col">
+              <Skeleton className="w-full aspect-square rounded-lg mb-4" />
+              <div className="flex items-center justify-center gap-6">
+                <Skeleton className="w-12 h-12 rounded-full" />
+                <Skeleton className="w-16 h-16 rounded-full" />
+                <Skeleton className="w-12 h-12 rounded-full" />
+              </div>
+            </div>
+
+            {/* Right Section - Track Listing */}
+            <div className="col-span-3">
+              {/* Album Info */}
+              <div className="mb-5">
+                <Skeleton className="w-full h-10" />
+              </div>
+
+              {/* Track List */}
+              <div className="space-y-1 relative">
+                <div className="relative">
+                  <Skeleton className="w-full h-[300px]" />
+                  <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="flex items-center gap-2">🎬 Script</CardTitle>
           </CardHeader>
@@ -64,7 +100,7 @@ function ScriptSectionLoading({ idea }: { idea: any }) {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="bg-gradient-to-r from-muted to-muted/50 p-4 rounded-lg">
+                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-4 rounded-lg">
                       <GPTTypingEffect text={scene?.content!} className="select-all" />
                     </div>
                   </div>
@@ -139,7 +175,7 @@ async function ScriptSection({ idea }: { idea: any }) {
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="bg-gradient-to-r from-muted to-muted/50 p-4 rounded-lg">
+                    <div className="bg-gradient-to-r from-blue-100 to-blue-200 p-4 rounded-lg">
                       <p className="select-all">{scene?.content}</p>
                     </div>
                   </div>

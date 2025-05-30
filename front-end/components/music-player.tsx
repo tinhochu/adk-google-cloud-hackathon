@@ -1,20 +1,25 @@
 'use client'
 
+import CountrySelector from '@/components/country-selector'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import apiClient from '@/lib/apiClient'
 import { cn } from '@/lib/utils'
-import { Pause, Play, SkipBack, SkipForward } from 'lucide-react'
+import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-react'
 import Image from 'next/image'
-import * as React from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export function MusicPlayer({ music }: { music: any[] }) {
-  const [currentSong, setCurrentSong] = React.useState(music[0])
-  const [isPlaying, setIsPlaying] = React.useState(false)
-  const [audioUrl, setAudioUrl] = React.useState<string | null>(null)
-  const audioRef = React.useRef<HTMLAudioElement | null>(null)
-  const [isLoading, setIsLoading] = React.useState(false)
+  const [currentSong, setCurrentSong] = useState(music[0])
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [country, setCountry] = useState<string | null>('US') // default to US
+  const [topSongs, setTopSongs] = useState<any[]>(music)
+  const [isLoadingTopSongs, setIsLoadingTopSongs] = useState(false)
+  const scrollAreaWrapperRef = useRef<HTMLDivElement | null>(null)
 
   // Fetch audio when play is pressed and not already loaded
   const fetchAudio = async (musicId: string) => {
@@ -78,7 +83,7 @@ export function MusicPlayer({ music }: { music: any[] }) {
   }
 
   // When currentSong changes, reset audio state but do not autoplay
-  React.useEffect(() => {
+  useEffect(() => {
     setAudioUrl(null)
     setIsPlaying(false)
     if (audioRef.current) {
@@ -89,7 +94,7 @@ export function MusicPlayer({ music }: { music: any[] }) {
   }, [currentSong])
 
   // Play/pause audio element when isPlaying changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
         const playPromise = audioRef.current.play()
@@ -104,6 +109,36 @@ export function MusicPlayer({ music }: { music: any[] }) {
       }
     }
   }, [isPlaying, audioUrl])
+
+  useEffect(() => {
+    if (country) {
+      const fetchTopSongsByCountry = async () => {
+        try {
+          setIsLoadingTopSongs(true)
+          const response = await apiClient.get(`/tiktok/trending-by-country?country=${country}`)
+
+          setTopSongs(response.data?.sound_list || music)
+        } catch (error) {
+          console.error(error)
+          setTopSongs(music)
+        } finally {
+          setIsLoadingTopSongs(false)
+        }
+      }
+      fetchTopSongsByCountry()
+    }
+  }, [country])
+
+  useEffect(() => {
+    if (scrollAreaWrapperRef.current) {
+      const scrollable = scrollAreaWrapperRef.current.querySelector(
+        '[data-radix-scroll-area-viewport], .scroll-area-viewport, .your-scrollable-class'
+      )
+      if (scrollable) {
+        ;(scrollable as HTMLDivElement).scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }
+  }, [topSongs])
 
   const handlePrevious = () => {
     const currentIndex = music.findIndex((song) => song.clip_id === currentSong.clip_id)
@@ -126,6 +161,16 @@ export function MusicPlayer({ music }: { music: any[] }) {
 
   return (
     <Card>
+      <CardHeader>
+        <CardTitle>
+          <CountrySelector
+            value={country ?? ''}
+            onValueChange={(value) => setCountry(value)}
+            isLoading={isLoadingTopSongs}
+          />
+        </CardTitle>
+      </CardHeader>
+
       <CardContent className="grid grid-cols-4 gap-4">
         {/* Left Section - Album Art and Controls */}
         <div className="col-span-1 flex flex-col">
@@ -148,6 +193,7 @@ export function MusicPlayer({ music }: { music: any[] }) {
                 size="icon"
                 onClick={handlePrevious}
                 className="border-black border-2 hover:bg-white/10 h-12 w-12 rounded-full hover:cursor-pointer hover:scale-105 transition-all duration-300"
+                disabled={isLoading}
               >
                 <SkipBack className="h-12 w-12" />
               </Button>
@@ -171,6 +217,7 @@ export function MusicPlayer({ music }: { music: any[] }) {
                 size="icon"
                 onClick={handleNext}
                 className="border-black border-2 hover:bg-white/10 h-12 w-12 rounded-full hover:cursor-pointer hover:scale-105 transition-all duration-300"
+                disabled={isLoading}
               >
                 <SkipForward className="h-12 w-12" />
               </Button>
@@ -188,17 +235,17 @@ export function MusicPlayer({ music }: { music: any[] }) {
         {/* Right Section - Track Listing */}
         <div className="col-span-3">
           {/* Album Info */}
-          <div className="mb-8">
-            <h1 className="text-xl font-semibold mb-2">{currentSong.title}</h1>
-            <p className="text-sm text-gray-600">
-              <span className="font-bold">Reason:</span> {currentSong.reason}
-            </p>
+          <div className="mb-5">
+            <h1 className="text-xl font-semibold mb-2 flex flex-col">
+              <span>{currentSong.title}</span>
+              <span className="text-gray-600 text-xs font-light leading-none">{currentSong.author}</span>
+            </h1>
           </div>
 
           {/* Track List */}
-          <div className="space-y-1">
-            <ScrollArea className="h-[200px] rounded-md border">
-              {music.map((song, index) => (
+          <div className="space-y-1 relative">
+            <ScrollArea className="h-[300px] rounded-md border" ref={scrollAreaWrapperRef}>
+              {topSongs.map((song, index) => (
                 <div
                   key={song?.clip_id || index}
                   onClick={() => handleSongSelect(song)}
@@ -208,15 +255,21 @@ export function MusicPlayer({ music }: { music: any[] }) {
                   )}
                 >
                   <div className="flex items-center gap-4">
-                    <span className="text-gray-400 font-light w-6">{index + 1}</span>
+                    <span className="font-semibold w-6">{index + 1}</span>
                     <span className={cn('text-black font-normal', currentSong.id === song.id && 'font-medium')}>
-                      {song.title}
+                      <div className="flex items-center leading-none">{song.title}</div>
+                      <span className="text-gray-500 text-xs font-light leading-none">{song.author}</span>
                     </span>
                   </div>
                   <span className="text-sm text-gray-500 font-light">{song.duration}s</span>
                 </div>
               ))}
             </ScrollArea>
+            {isLoadingTopSongs && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            )}
           </div>
         </div>
       </CardContent>

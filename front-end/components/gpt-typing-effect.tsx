@@ -26,7 +26,7 @@ const GPTTypingEffect: React.FC<GPTTypingEffectProps> = ({ text, typingSpeed = 2
     }
   }, [currentIndex, text, typingSpeed])
 
-  return <p className={cn('', className)}>{isMarkdown ? <Markdown>{displayedText}</Markdown> : displayedText}</p>
+  return isMarkdown ? <Markdown>{displayedText}</Markdown> : <p className={cn('', className)}>{displayedText}</p>
 }
 
 export default GPTTypingEffect

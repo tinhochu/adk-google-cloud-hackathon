@@ -45,7 +45,7 @@ function Caption({ caption, gptEffect = true }: { caption: string; gptEffect?: b
         </Button>
       </CardHeader>
       <CardContent>
-        <div className="bg-muted p-4 rounded-md">
+        <div className="bg-muted p-4 rounded-md [&>p]:select-all">
           {gptEffect ? <GPTTypingEffect text={caption} isMarkdown={true} /> : <Markdown>{caption}</Markdown>}
         </div>
       </CardContent>
