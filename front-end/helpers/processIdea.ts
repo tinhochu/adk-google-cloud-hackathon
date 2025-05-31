@@ -1,5 +1,6 @@
 export default async function processIdea(idea: any) {
   try {
+    console.log('::processIdea:: Processing idea', { idea })
     // create the session
     const responseSession = await fetch(
       `${process.env.API_AGENT_URL!}/apps/creator_companion_agent/users/u_${idea?.userId?.toString()}/sessions/s_${idea?._id?.toString() ?? idea?.id?.toString()}_${Date.now()}`,

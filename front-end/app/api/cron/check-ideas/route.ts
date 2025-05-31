@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
 
     // if there is no ideas, return
     if (!ideas || ideas.length === 0) {
-      console.log('No ideas to check')
+      console.log('👌 No ideas to check ')
+      return Response.json({ success: true }, { status: 200 })
     }
 
     console.log(`Enqueuing ${ideas.length} ideas...`)
