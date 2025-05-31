@@ -1,8 +1,8 @@
 'use server'
 
-import { ideaQueue } from '@/app/api/queues/idea/route'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
+import { ideaQueue } from '@/queues/idea'
 import { revalidatePath } from 'next/cache'
 
 export async function updatePromptAction(prevState: any, formData: FormData) {

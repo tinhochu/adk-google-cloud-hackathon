@@ -32,7 +32,7 @@ export default function AudioWave() {
                 width: '8px',
               }}
               animate={{
-                height: true ? `${height}%` : '20%',
+                height: `${height}%`,
               }}
               transition={{
                 duration: 0.15,

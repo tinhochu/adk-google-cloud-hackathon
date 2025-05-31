@@ -1,9 +1,9 @@
 'use server'
 
-import { ideaQueue } from '@/app/api/queues/idea/route'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
 import User from '@/models/User'
+import { ideaQueue } from '@/queues/idea'
 
 export async function createIdeaAction(prevState: any, formData: FormData) {
   try {

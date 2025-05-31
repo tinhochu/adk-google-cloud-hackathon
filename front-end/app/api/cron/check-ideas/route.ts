@@ -1,6 +1,6 @@
-import { ideaQueue } from '@/app/api/queues/idea/route'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
+import { ideaQueue } from '@/queues/idea'
 import type { NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {

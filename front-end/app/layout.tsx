@@ -9,7 +9,7 @@ import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
-import { Suspense } from 'react'
+import React, { Suspense } from 'react'
 import { extractRouterConfig } from 'uploadthing/server'
 
 import './globals.css'
