@@ -1,6 +1,3 @@
-import connectMongo from '@/lib/mongoose'
-import Idea from '@/models/Idea'
-
 export default async function processIdea(idea: any) {
   try {
     // create the session
