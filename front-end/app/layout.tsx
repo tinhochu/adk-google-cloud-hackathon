@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 import { ClerkProvider } from '@clerk/nextjs'
 import { NextSSRPlugin } from '@uploadthing/react/next-ssr-plugin'
+import { Analytics } from '@vercel/analytics/next'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
@@ -58,6 +59,7 @@ export default function RootLayout({
               </main>
               <Toaster />
             </SidebarProvider>
+            <Analytics />
           </body>
         </ClerkProvider>
       </NuqsAdapter>
