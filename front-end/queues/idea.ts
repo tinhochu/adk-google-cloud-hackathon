@@ -22,8 +22,12 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
     const contentPackagerAgent = response.find((item: any) => item.author === 'ContentPackagerAgent')
 
     // if there is no contentPackagerAgent, return
-    if (!contentPackagerAgent) return
+    if (!contentPackagerAgent) {
+      console.log('No content packager agent', idea.id)
+      return
+    }
 
+    console.log('Content packager agent', contentPackagerAgent)
     const jsonData = contentPackagerAgent.content?.parts[0]?.text.replace(/```json\n|```/g, '')
     const generatedPackage = JSON.parse(jsonData)
 
