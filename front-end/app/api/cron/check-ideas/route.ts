@@ -29,8 +29,8 @@ export async function GET(request: NextRequest) {
     console.log(`Enqueuing ${ideas.length} ideas...`)
     // for each idea, check if the idea is older than 1 hour
     for (const idea of ideas) {
-      console.log('::squirrel:: Enqueuing idea', { idea: idea.toJSON() })
-      await ideaQueue.enqueue({ ...idea, id: idea._id })
+      const ideaData = idea.toJSON()
+      await ideaQueue.enqueue({ ...ideaData, id: ideaData._id })
     }
 
     return Response.json({ success: true }, { status: 200 })

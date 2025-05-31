@@ -6,6 +6,7 @@ import { Queue } from 'quirrel/next-app'
 
 export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
   try {
+    console.log('::squirrel:: Received idea', { idea })
     await connectMongo()
     const pusher = new Pusher({
       appId: process.env.PUSHER_APP_ID!,
