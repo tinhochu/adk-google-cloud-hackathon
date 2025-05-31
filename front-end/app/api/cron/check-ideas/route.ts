@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     // for each idea, check if the idea is older than 1 hour
     for (const idea of ideas) {
       const ideaData = idea.toJSON()
-      await ideaQueue.enqueue({ ...ideaData, id: ideaData._id })
+      await ideaQueue.enqueue(ideaData)
     }
 
     return Response.json({ success: true }, { status: 200 })

@@ -14,6 +14,7 @@ export default async function processIdea(idea: any) {
     // get the data
     const dataSession = await responseSession.json()
 
+    // run the idea
     const response = await fetch(`${process.env.API_AGENT_URL!}/run`, {
       method: 'POST',
       headers: {
