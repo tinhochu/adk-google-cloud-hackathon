@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { STATUS } from '@/constants'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
 import { ArrowLeft } from 'lucide-react'
@@ -30,7 +31,7 @@ export default async function IdeaDetailsPage({ params }: IdeaDetailsPageProps) 
   const { ideaId } = await params
   const ideaData = await getIdea(ideaId)
 
-  if (ideaData?.status !== 'completed') {
+  if (ideaData?.status !== STATUS.COMPLETED) {
     return <div className="w-full mx-auto px-4 py-6">Idea not completed yet</div>
   }
 
@@ -52,22 +53,6 @@ export default async function IdeaDetailsPage({ params }: IdeaDetailsPageProps) 
       <Suspense fallback={<ScriptSectionLoading idea={ideaData} />}>
         <ScriptSection idea={ideaData} />
       </Suspense>
-
-      {/* Action Buttons */}
-      {/* <div className="flex flex-wrap gap-4 justify-center">
-        <Button size="lg" className="gap-2">
-          <ExternalLink className="h-4 w-4" />
-          Post to Instagram
-        </Button>
-        <Button variant="outline" size="lg" onClick={handleRegenerate} disabled={isRegenerating}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRegenerating ? 'animate-spin' : ''}`} />
-          {isRegenerating ? 'Regenerating...' : 'Regenerate Content'}
-        </Button>
-        <Button variant="outline" size="lg" className="gap-2">
-          <Copy className="h-4 w-4" />
-          Copy All Content
-        </Button>
-      </div> */}
     </div>
   )
 }

@@ -285,3 +285,10 @@ export const COUNTRIES = [
   { name: 'Zambia', flag: '🇿🇲', code: 'ZM' },
   { name: 'Zimbabwe', flag: '🇿🇼', code: 'ZW' },
 ]
+
+export const STATUS = {
+  COMPLETED: 'completed',
+  PENDING: 'pending',
+  PROCESSING: 'processing',
+  FAILED: 'failed',
+}
