@@ -15,7 +15,7 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
       useTLS: true,
     })
 
-    console.log('Processing idea', idea.id)
+    console.log('::squirrel:: processing idea', idea.id)
     const response = await processIdea(idea)
 
     // find in the Array the author 'ContentPackagerAgent'
@@ -23,16 +23,16 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
 
     // if there is no contentPackagerAgent, return
     if (!contentPackagerAgent) {
-      console.log('No content packager agent', idea.id)
+      console.log('::squirrel:: No content packager agent', idea.id)
       return
     }
 
-    console.log('Content packager agent', contentPackagerAgent)
+    console.log('::squirrel:: Content packager agent', contentPackagerAgent)
     const jsonData = contentPackagerAgent.content?.parts[0]?.text.replace(/```json\n|```/g, '')
     const generatedPackage = JSON.parse(jsonData)
 
     // update the idea with the generated package
-    console.log('Updating idea', idea.id)
+    console.log('::squirrel:: Updating idea', idea.id)
     await Idea.findByIdAndUpdate(idea.id, {
       $set: {
         status: 'completed',
@@ -40,14 +40,14 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
       },
     })
 
-    console.log('Triggering pusher', idea.id)
+    console.log('::squirrel:: Triggering pusher', idea.id)
     pusher.trigger(`task/${idea.id}`, 'task-status-update', {
       status: 'completed',
       message: 'Idea completed',
       ideaId: idea.id,
     })
 
-    console.log('Idea completed', idea.id)
+    console.log('::squirrel:: Idea completed', idea.id)
   } catch (error) {
     console.error(`Error processing idea ${idea.id}: ${error}`)
   }
