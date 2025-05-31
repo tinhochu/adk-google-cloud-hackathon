@@ -15,6 +15,7 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
       useTLS: true,
     })
 
+    console.log('Processing idea', idea.id)
     const response = await processIdea(idea)
 
     // find in the Array the author 'ContentPackagerAgent'
@@ -27,6 +28,7 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
     const generatedPackage = JSON.parse(jsonData)
 
     // update the idea with the generated package
+    console.log('Updating idea', idea.id)
     await Idea.findByIdAndUpdate(idea.id, {
       $set: {
         status: 'completed',
@@ -34,11 +36,14 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
       },
     })
 
+    console.log('Triggering pusher', idea.id)
     pusher.trigger(`task/${idea.id}`, 'task-status-update', {
       status: 'completed',
       message: 'Idea completed',
       ideaId: idea.id,
     })
+
+    console.log('Idea completed', idea.id)
   } catch (error) {
     console.error(`Error processing idea ${idea.id}: ${error}`)
   }
