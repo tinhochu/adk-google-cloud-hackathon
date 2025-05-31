@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/check-ideas",
-      "schedule": "*/1 * * * * "
+      "schedule": "*/1 * * * *"
     }
   ]
 }

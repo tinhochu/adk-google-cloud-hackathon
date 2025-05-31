@@ -1,11 +1,20 @@
 import processIdea from '@/helpers/processIdea'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
+import Pusher from 'pusher'
 import { Queue } from 'quirrel/next-app'
 
 export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
   try {
     await connectMongo()
+    const pusher = new Pusher({
+      appId: process.env.PUSHER_APP_ID!,
+      key: process.env.PUSHER_KEY!,
+      secret: process.env.PUSHER_SECRET!,
+      cluster: 'us2',
+      useTLS: true,
+    })
+
     const response = await processIdea(idea)
 
     // find in the Array the author 'ContentPackagerAgent'
@@ -23,6 +32,12 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
         status: 'completed',
         ...generatedPackage,
       },
+    })
+
+    pusher.trigger(`task/${idea.id}`, 'task-status-update', {
+      status: 'completed',
+      message: 'Idea completed',
+      ideaId: idea.id,
     })
   } catch (error) {
     console.error(error)
