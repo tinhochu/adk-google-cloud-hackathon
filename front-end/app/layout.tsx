@@ -1,7 +1,7 @@
 import { ourFileRouter } from '@/app/api/uploadthing/core'
 import { AppSidebar } from '@/components/app-sidebar'
 import Header from '@/components/header'
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { SidebarProvider } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { cn } from '@/lib/utils'
 import { ClerkProvider } from '@clerk/nextjs'
