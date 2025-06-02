@@ -1,19 +1,19 @@
 import processIdea from '@/helpers/processIdea'
 import connectMongo from '@/lib/mongoose'
 import Idea from '@/models/Idea'
-// import Pusher from 'pusher'
+import Pusher from 'pusher'
 import { Queue } from 'quirrel/next-app'
 
 export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
   try {
     await connectMongo()
-    // const pusher = new Pusher({
-    //   appId: process.env.PUSHER_APP_ID!,
-    //   key: process.env.PUSHER_KEY!,
-    //   secret: process.env.PUSHER_SECRET!,
-    //   cluster: 'us2',
-    //   useTLS: true,
-    // })
+    const pusher = new Pusher({
+      appId: process.env.PUSHER_APP_ID!,
+      key: process.env.PUSHER_KEY!,
+      secret: process.env.PUSHER_SECRET!,
+      cluster: 'us2',
+      useTLS: true,
+    })
 
     const response = await processIdea(idea)
 
@@ -37,11 +37,11 @@ export const ideaQueue = Queue('api/queues/idea', async (idea: any) => {
       },
     })
 
-    // pusher.trigger(`task-${idea.id}`, 'task-status-update', {
-    //   status: 'completed',
-    //   message: 'Idea completed',
-    //   ideaId: idea.id,
-    // })
+    pusher.trigger(`task-${idea.id}`, 'task.status.updated', {
+      status: 'completed',
+      message: 'Idea completed',
+      ideaId: idea.id,
+    })
 
     console.log('👌 Idea completed', idea.id)
   } catch (error) {

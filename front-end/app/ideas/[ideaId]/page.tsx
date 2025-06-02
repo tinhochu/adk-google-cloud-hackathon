@@ -33,7 +33,7 @@ export default async function IdeaDetailsPage({ params }: IdeaDetailsPageProps) 
   const ideaData = await getIdea(ideaId)
 
   if (ideaData?.status !== STATUS.COMPLETED) {
-    return <IdeaLoading prompt={ideaData?.prompt ?? ''} />
+    return <IdeaLoading prompt={ideaData?.prompt ?? ''} ideaId={ideaId} />
   }
 
   return (

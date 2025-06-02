@@ -129,35 +129,42 @@ async function ScriptSection({ idea }: { idea: any }) {
   // Generate images for each scene
   const sceneImages = await Promise.all(
     parsedScenes.map(async (scene) => {
-      const prompt = `show me a picture or mockup with this scene: ${scene?.content}. make an rough example image`
-      const response = await ai.models.generateImages({
-        model: 'models/imagen-3.0-generate-002',
-        config: {
-          numberOfImages: 1,
-          aspectRatio: '9:16',
-        },
-        prompt,
-      })
+      try {
+        const prompt = `show me a picture or mockup with this scene: ${scene?.content}. make an rough example image`
+        const response = await ai.models.generateImages({
+          model: 'models/imagen-3.0-generate-002',
+          config: {
+            numberOfImages: 1,
+            aspectRatio: '9:16',
+          },
+          prompt,
+        })
 
-      // Adjust this depending on the actual response structure
-      const image = response.generatedImages?.[0]?.image?.imageBytes
+        // Adjust this depending on the actual response structure
+        const image = response.generatedImages?.[0]?.image?.imageBytes
 
-      // return base64 string
-      return image || null
+        // return base64 string
+        return image || null
+      } catch (error) {
+        console.error('Error generating image for scene:', scene, error)
+        return null // fallback if error
+      }
     })
   )
 
   // Guess the Country of the Idea
-  const countryResponse = await ai.models.generateContent({
-    model: 'gemini-2.0-flash-001',
-    contents: `Guess the country of the idea based on the prompt: ${prompt}. if you can't guess the country, the fallback is US. return the country in the following format:
-    {
-      "country_code": "Country Code"
-    }
-    `,
-  })
+  let country = { country_code: 'US' }
+  try {
+    const countryResponse = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-001',
+      contents: `Guess the country of the idea based on the prompt: ${prompt}. if you can't guess the country, the fallback is US. return the country in the following format:\n    {\n      "country_code": "Country Code"\n    }\n    `,
+    })
 
-  const country = JSON.parse(countryResponse.text?.replace(/```json\n|```/g, '') ?? '{}')
+    country = JSON.parse(countryResponse.text?.replace(/```json\n|```/g, '') ?? '{}')
+  } catch (error) {
+    console.error('Error guessing country:', error)
+    // fallback to default country already set
+  }
 
   return (
     <div className="grid grid-cols-4 gap-4">
