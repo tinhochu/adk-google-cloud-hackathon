@@ -28,13 +28,19 @@ export default async function IdeaLoading({ prompt, ideaId }: { prompt: string; 
   try {
     const response = await gemini.models.generateContent({
       model: 'gemini-2.0-flash-001',
-      contents: `With this prompt ${prompt}, generate an array of 10 sentences that are related to the prompt that serves as loading messages. do not generate script, just the sentences. you can use the following format:\n[\n  \"Sentence 1\",\n  \"Sentence 2\",\n  ...\n]\n`,
+      contents: `With this prompt ${prompt}, generate an array of 10 sentences that are related to the prompt that serves as loading messages. do not generate script, just the sentences. you can use the following format:
+[
+  "Sentence 1",
+  "Sentence 2",
+  ...
+]
+`,
     })
     messages = JSON.parse(response.text?.replace(/```json\n|```/g, '') ?? '[]')
     if (!Array.isArray(messages) || messages.length === 0) {
       messages = fallbackMessages
     }
-  } catch (e: any) {
+  } catch {
     messages = fallbackMessages
   }
 
