@@ -10,13 +10,13 @@ import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
-export function MusicPlayer({ music }: { music: any[] }) {
+export function MusicPlayer({ music, guessCountry = 'US' }: { music: any[]; guessCountry?: string }) {
   const [currentSong, setCurrentSong] = useState(music[0])
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [country, setCountry] = useState<string | null>('US') // default to US
+  const [country, setCountry] = useState<string | null>(guessCountry) // default to US
   const [topSongs, setTopSongs] = useState<any[]>(music)
   const [isLoadingTopSongs, setIsLoadingTopSongs] = useState(false)
   const scrollAreaWrapperRef = useRef<HTMLDivElement | null>(null)

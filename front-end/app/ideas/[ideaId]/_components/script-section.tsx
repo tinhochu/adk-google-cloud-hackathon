@@ -147,6 +147,18 @@ async function ScriptSection({ idea }: { idea: any }) {
     })
   )
 
+  // Guess the Country of the Idea
+  const countryResponse = await ai.models.generateContent({
+    model: 'gemini-2.0-flash-001',
+    contents: `Guess the country of the idea based on the prompt: ${prompt}. if you can't guess the country, the fallback is US. return the country in the following format:
+    {
+      "country_code": "Country Code"
+    }
+    `,
+  })
+
+  const country = JSON.parse(countryResponse.text?.replace(/```json\n|```/g, '') ?? '{}')
+
   return (
     <div className="grid grid-cols-4 gap-4">
       <div className="col-span-3">
@@ -159,7 +171,7 @@ async function ScriptSection({ idea }: { idea: any }) {
           </CardContent>
         </Card>
 
-        <MusicPlayer music={generated_music} />
+        <MusicPlayer music={generated_music} guessCountry={country?.country_code ?? 'US'} />
 
         <Card className="mb-6 mt-6">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">

@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Suspense } from 'react'
 
+import IdeaLoading from './_components/idea-loading'
 import { ScriptSection, ScriptSectionLoading } from './_components/script-section'
 
 interface IdeaDetailsPageProps {
@@ -32,7 +33,7 @@ export default async function IdeaDetailsPage({ params }: IdeaDetailsPageProps) 
   const ideaData = await getIdea(ideaId)
 
   if (ideaData?.status !== STATUS.COMPLETED) {
-    return <div className="w-full mx-auto px-4 py-6">Idea not completed yet</div>
+    return <IdeaLoading prompt={ideaData?.prompt ?? ''} />
   }
 
   return (
