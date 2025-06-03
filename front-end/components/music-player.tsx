@@ -23,7 +23,7 @@ export function MusicPlayer({ music, guessCountry = 'US' }: { music: any[]; gues
 
   // Fetch audio when play is pressed and not already loaded
   const fetchAudio = async (musicId: string) => {
-    const response = await apiClient.get(`/tiktok/music?musicId=${musicId}`)
+    const response = await apiClient.get(`/music?musicId=${musicId}&platform=tiktok`)
     return response.data?.musicInfo?.music.playUrl
   }
 
