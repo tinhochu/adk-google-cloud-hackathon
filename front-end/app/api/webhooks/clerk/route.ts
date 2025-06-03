@@ -36,9 +36,20 @@ export async function POST(req: NextRequest) {
 
         // Send a welcome email to the user
         return NextResponse.json({ message: 'User created' }, { status: 201 })
-    }
 
-    return NextResponse.json({ message: 'OK' }, { status: 200 })
+      case CLERK_EVENTS.USER_DELETED:
+        // delete also the shops of the user
+        const user = await User.findOne({ clerkId: data.id })
+
+        if (!user) return NextResponse.json({ message: 'User not found' }, { status: 404 })
+
+        await user.deleteOne()
+
+        return NextResponse.json({ message: 'User deleted' }, { status: 200 })
+
+      default:
+        return NextResponse.json({ message: 'OK' }, { status: 200 })
+    }
   } catch (error) {
     console.error(error)
     return NextResponse.json({ message: 'Error' }, { status: 500 })
