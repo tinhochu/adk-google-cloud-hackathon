@@ -1,12 +1,15 @@
 'use client'
 
 import { STATUS } from '@/constants'
+import { useTaskStatus } from '@/hooks/use-task-status'
 import Pusher from 'pusher-js'
 import { useEffect, useState } from 'react'
 
 export default function RotatingLoadingMessages({ messages, ideaId }: { messages: string[]; ideaId: string }) {
   const [currentMessage, setCurrentMessage] = useState(0)
   const [fade, setFade] = useState(true)
+
+  const { status } = useTaskStatus(ideaId)
 
   useEffect(function initPusher() {
     // Initialize Pusher
@@ -48,6 +51,12 @@ export default function RotatingLoadingMessages({ messages, ideaId }: { messages
 
     return () => clearInterval(interval)
   }, [messages])
+
+  useEffect(() => {
+    if (status === STATUS.COMPLETED) {
+      window.location.reload()
+    }
+  }, [status])
 
   return (
     <span
