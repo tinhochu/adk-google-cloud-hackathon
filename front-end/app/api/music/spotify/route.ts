@@ -55,8 +55,14 @@ export async function POST(req: NextRequest) {
     // get the playlist
     const playlist = playlistData.playlists.items[0]
 
+    if (!playlist) {
+      return NextResponse.json({ error: 'No playlist found' }, { status: 404 })
+    }
+
+    console.log({ playlist })
+
     // get the tracks
-    const tracksResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist.id}/tracks`, {
+    const tracksResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist?.id}/tracks`, {
       headers: {
         Authorization: `Bearer ${data.access_token}`,
       },
