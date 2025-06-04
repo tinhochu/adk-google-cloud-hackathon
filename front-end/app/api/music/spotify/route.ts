@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const clientId = process.env.SPOTIFY_CLIENT_ID!
-const clientSecret = process.env.SPOTIFY_CLIENT_SECRET!
-
 export async function POST(req: NextRequest) {
+  const clientId = process.env.SPOTIFY_CLIENT_ID!
+  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET!
+
   if (!clientId || !clientSecret) {
+    console.error('Missing Spotify client credentials')
     return NextResponse.json({ error: 'Missing Spotify client credentials' }, { status: 500 })
   }
   const { genres } = await req.json()
@@ -77,6 +78,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: { tracks: simplifiedTracks } })
   } catch (err) {
+    console.error(err)
     return NextResponse.json({ error: 'Failed to fetch token', details: String(err) }, { status: 500 })
   }
 }
