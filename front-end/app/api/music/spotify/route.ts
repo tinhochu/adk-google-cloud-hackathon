@@ -46,6 +46,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error }, { status: playlistResponse.status })
     }
 
+    if (playlistData.playlists.items.length === 0) {
+      return NextResponse.json({ error: 'No playlists found' }, { status: 404 })
+    }
+
     // get the playlist
     const playlist = playlistData.playlists.items[0]
 
