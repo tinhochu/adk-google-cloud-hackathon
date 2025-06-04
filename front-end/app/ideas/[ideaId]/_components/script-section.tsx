@@ -123,6 +123,10 @@ async function ScriptSection({ idea }: { idea: any }) {
   // Get the idea data
   const { generated_script, generated_caption, generated_music, prompt } = idea
 
+  // Guess the Country of the Idea
+  let country = { country_code: 'US' }
+  let genres = ['Pop']
+
   // Parse the script into scenes
   const parsedScenes = parseScript(generated_script)
 
@@ -152,18 +156,30 @@ async function ScriptSection({ idea }: { idea: any }) {
     })
   )
 
-  // Guess the Country of the Idea
-  let country = { country_code: 'US' }
   try {
+    // get the country of the idea
     const countryResponse = await ai.models.generateContent({
       model: 'gemini-2.0-flash-001',
       contents: `Guess the country of the idea based on the prompt: ${prompt}. if you can't guess the country, the fallback is US. return the country in the following format:\n    {\n      "country_code": "Country Code"\n    }\n    `,
     })
 
+    // remove the ```json\n|``` from the response
     country = JSON.parse(countryResponse.text?.replace(/```json\n|```/g, '') ?? '{}')
   } catch (error) {
     console.error('Error guessing country:', error)
-    // fallback to default country already set
+  }
+
+  try {
+    // get the country of the idea
+    const genreResponse = await ai.models.generateContent({
+      model: 'gemini-2.0-flash-001',
+      contents: `You are a music expert, from the script: ${generated_script}. tell me the best genre for this script. return the top 3 genres in the following format:\n    [{"value": "Genre"},\n    {"value": "Genre"},\n    {"value": "Genre"}] and nothing else\n    `,
+    })
+
+    // remove the ```json\n|``` from the response
+    genres = JSON.parse(genreResponse.text?.replace(/```json\n|```/g, '') ?? '{}')
+  } catch (error) {
+    console.error('Error guessing genre:', error)
   }
 
   return (
@@ -178,7 +194,11 @@ async function ScriptSection({ idea }: { idea: any }) {
           </CardContent>
         </Card>
 
-        <MusicPlayer music={generated_music} guessCountry={country?.country_code ?? 'US'} />
+        <MusicPlayer
+          music={generated_music}
+          guessCountry={country?.country_code ?? 'US'}
+          genres={genres?.map((genre: any) => genre.value).join(',') ?? 'Pop'}
+        />
 
         <Card className="mb-6 mt-6">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
