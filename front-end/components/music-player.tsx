@@ -10,65 +10,76 @@ import apiClient from '@/lib/apiClient'
 import { cn } from '@/lib/utils'
 import { Loader2, Pause, Play, SkipBack, SkipForward } from 'lucide-react'
 import Image from 'next/image'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-export function MusicPlayer({
-  music,
-  guessCountry = 'US',
-  genres = 'Pop',
-}: {
-  music: any[]
+// Define Song type for type safety
+interface Song {
+  clip_id: string
+  id: string
+  title: string
+  author: string
+  cover: string
+  duration: number
+}
+
+interface MusicPlayerProps {
+  music: Song[]
   guessCountry?: string
   genres?: string
-}) {
-  const [currentSong, setCurrentSong] = useState(music[0])
+}
+
+export function MusicPlayer({ music, guessCountry = 'US', genres = 'Pop' }: MusicPlayerProps) {
+  const [currentSong, setCurrentSong] = useState<Song>(music[0])
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const [country, setCountry] = useState<string | null>(guessCountry) // default to US
-  const [topSongs, setTopSongs] = useState<any[]>(music)
+  const [country, setCountry] = useState<string>(guessCountry)
+  const [topSongs, setTopSongs] = useState<Song[]>(music)
   const [isLoadingTopSongs, setIsLoadingTopSongs] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const scrollAreaWrapperRef = useRef<HTMLDivElement | null>(null)
 
-  // Fetch audio when play is pressed and not already loaded
-  const fetchAudio = async (musicId: string) => {
+  // Fetch audio URL for a song
+  const fetchAudio = useCallback(async (musicId: string) => {
     const response = await apiClient.get(`/music?musicId=${musicId}&platform=tiktok`)
-    return response.data?.musicInfo?.music.playUrl
-  }
+    return response.data?.musicInfo?.music.playUrl as string
+  }, [])
 
-  // Refactored play logic
-  const playSong = async (song: any) => {
-    setIsLoading(true)
-    try {
-      const url = await fetchAudio(song.clip_id)
-      setAudioUrl(url)
-      // Try to play audio after setting URL
-      setTimeout(() => {
-        if (audioRef.current) {
-          const playPromise = audioRef.current.play()
-          if (playPromise !== undefined) {
-            playPromise
-              .then(() => {
-                setIsPlaying(true)
-              })
-              .catch((error) => {
-                setIsPlaying(false)
-                console.warn('Autoplay was prevented:', error)
-              })
+  // Play a song (fetch audio if needed)
+  const playSong = useCallback(
+    async (song: Song) => {
+      setIsLoading(true)
+      setError(null)
+      try {
+        const url = await fetchAudio(song.clip_id)
+        setAudioUrl(url)
+        setTimeout(() => {
+          if (audioRef.current) {
+            const playPromise = audioRef.current.play()
+            if (playPromise !== undefined) {
+              playPromise
+                .then(() => setIsPlaying(true))
+                .catch((error) => {
+                  setIsPlaying(false)
+                  setError('Autoplay was prevented. Tap play to start.')
+                })
+            }
           }
-        }
-      }, 0)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+        }, 0)
+      } catch (e) {
+        setError('Failed to load audio.')
+      } finally {
+        setIsLoading(false)
+      }
+    },
+    [fetchAudio]
+  )
 
-  const handlePlayPause = async () => {
+  // Play/pause button handler
+  const handlePlayPause = useCallback(async () => {
+    setError(null)
     if (!isPlaying) {
-      // If audio not loaded for current song, fetch it
       if (!audioUrl || audioRef.current?.src !== audioUrl) {
         await playSong(currentSong)
       } else {
@@ -76,12 +87,10 @@ export function MusicPlayer({
           const playPromise = audioRef.current.play()
           if (playPromise !== undefined) {
             playPromise
-              .then(() => {
-                setIsPlaying(true)
-              })
-              .catch((error) => {
+              .then(() => setIsPlaying(true))
+              .catch(() => {
                 setIsPlaying(false)
-                console.warn('Autoplay was prevented:', error)
+                setError('Autoplay was prevented. Tap play to start.')
               })
           }
         }
@@ -90,17 +99,17 @@ export function MusicPlayer({
       setIsPlaying(false)
       audioRef.current?.pause()
     }
-  }
+  }, [isPlaying, audioUrl, playSong, currentSong])
 
-  // When currentSong changes, reset audio state but do not autoplay
+  // Reset audio state when currentSong changes
   useEffect(() => {
     setAudioUrl(null)
     setIsPlaying(false)
+    setError(null)
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
     }
-    // Do NOT autoplay here
   }, [currentSong])
 
   // Play/pause audio element when isPlaying changes
@@ -109,9 +118,9 @@ export function MusicPlayer({
       if (isPlaying) {
         const playPromise = audioRef.current.play()
         if (playPromise !== undefined) {
-          playPromise.catch((error) => {
+          playPromise.catch(() => {
             setIsPlaying(false)
-            console.warn('Autoplay was prevented:', error)
+            setError('Autoplay was prevented. Tap play to start.')
           })
         }
       } else {
@@ -120,25 +129,33 @@ export function MusicPlayer({
     }
   }, [isPlaying, audioUrl])
 
+  // Fetch top songs by country
   useEffect(() => {
+    let cancelled = false
     if (country) {
       const fetchTopSongsByCountry = async () => {
+        setIsLoadingTopSongs(true)
+        setError(null)
         try {
-          setIsLoadingTopSongs(true)
           const response = await apiClient.get(`/tiktok/trending-by-country?country=${country}`)
-
-          setTopSongs(response.data?.sound_list || music)
+          if (!cancelled) setTopSongs(response.data?.sound_list || music)
         } catch (error) {
-          console.error(error)
-          setTopSongs(music)
+          if (!cancelled) {
+            setTopSongs(music)
+            setError('Failed to load trending songs.')
+          }
         } finally {
-          setIsLoadingTopSongs(false)
+          if (!cancelled) setIsLoadingTopSongs(false)
         }
       }
       fetchTopSongsByCountry()
     }
-  }, [country])
+    return () => {
+      cancelled = true
+    }
+  }, [country, music])
 
+  // Scroll to top of track list when topSongs change
   useEffect(() => {
     if (scrollAreaWrapperRef.current) {
       const scrollable = scrollAreaWrapperRef.current.querySelector(
@@ -150,31 +167,37 @@ export function MusicPlayer({
     }
   }, [topSongs])
 
-  const handlePrevious = () => {
-    const currentIndex = music.findIndex((song) => song.clip_id === currentSong.clip_id)
-    const previousIndex = currentIndex > 0 ? currentIndex - 1 : music.length - 1
-    setCurrentSong(music[previousIndex])
-  }
+  // Memoize current index for navigation
+  const currentIndex = useMemo(
+    () => topSongs.findIndex((song) => song.clip_id === currentSong.clip_id),
+    [topSongs, currentSong]
+  )
 
-  const handleNext = () => {
-    const currentIndex = music.findIndex((song) => song.clip_id === currentSong.clip_id)
-    const nextIndex = currentIndex < music.length - 1 ? currentIndex + 1 : 0
-    setCurrentSong(music[nextIndex])
-  }
+  // Previous/Next handlers
+  const handlePrevious = useCallback(() => {
+    if (topSongs.length === 0) return
+    setCurrentSong(topSongs[(currentIndex - 1 + topSongs.length) % topSongs.length])
+  }, [topSongs, currentIndex])
 
-  // handleSongSelect only sets currentSong
-  const handleSongSelect = (song: (typeof music)[0]) => {
-    setCurrentSong(song)
+  const handleNext = useCallback(() => {
+    if (topSongs.length === 0) return
+    setCurrentSong(topSongs[(currentIndex + 1) % topSongs.length])
+  }, [topSongs, currentIndex])
 
-    playSong(song)
-  }
+  // Song select handler
+  const handleSongSelect = useCallback(
+    (song: Song) => {
+      setCurrentSong(song)
+      playSong(song)
+    },
+    [playSong]
+  )
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>🎼 Suggested Music</CardTitle>
       </CardHeader>
-
       <CardContent>
         <Tabs defaultValue="tiktok">
           <TabsList>
@@ -184,16 +207,11 @@ export function MusicPlayer({
           <TabsContent value="tiktok">
             <div className="grid grid-cols-4 gap-4">
               <div className="col-span-4">
-                <CountrySelector
-                  value={country ?? ''}
-                  onValueChange={(value) => setCountry(value)}
-                  isLoading={isLoadingTopSongs}
-                />
+                <CountrySelector value={country} onValueChange={setCountry} isLoading={isLoadingTopSongs} />
               </div>
               {/* Left Section - Album Art and Controls */}
               <div className="col-span-1 flex flex-col">
-                {/* Album Art */}
-                <div className="flex-1 flex  flex-col gap-4">
+                <div className="flex-1 flex flex-col gap-4">
                   <div className="overflow-hidden rounded-lg">
                     <div className="w-full h-full relative overflow-hidden">
                       <Image
@@ -211,7 +229,8 @@ export function MusicPlayer({
                       size="icon"
                       onClick={handlePrevious}
                       className="border-black border-2 hover:bg-white/10 h-12 w-12 rounded-full hover:cursor-pointer hover:scale-105 transition-all duration-300"
-                      disabled={isLoading}
+                      disabled={isLoading || isLoadingTopSongs}
+                      aria-label="Previous song"
                     >
                       <SkipBack className="h-12 w-12" />
                     </Button>
@@ -220,7 +239,8 @@ export function MusicPlayer({
                       variant="outline"
                       size="icon"
                       className="border-black border-2 hover:bg-white/10 h-16 w-16 rounded-full hover:cursor-pointer hover:scale-105 transition-all duration-300"
-                      disabled={isLoading}
+                      disabled={isLoading || isLoadingTopSongs}
+                      aria-label={isPlaying ? 'Pause' : 'Play'}
                     >
                       {isLoading ? (
                         <span className="animate-spin h-8 w-8 border-4 border-gray-300 border-t-black rounded-full inline-block" />
@@ -235,53 +255,59 @@ export function MusicPlayer({
                       size="icon"
                       onClick={handleNext}
                       className="border-black border-2 hover:bg-white/10 h-12 w-12 rounded-full hover:cursor-pointer hover:scale-105 transition-all duration-300"
-                      disabled={isLoading}
+                      disabled={isLoading || isLoadingTopSongs}
+                      aria-label="Next song"
                     >
                       <SkipForward className="h-12 w-12" />
                     </Button>
                   </div>
-                  {/* Audio element */}
                   <audio
                     ref={audioRef}
                     src={audioUrl || undefined}
                     onEnded={() => setIsPlaying(false)}
                     style={{ display: 'none' }}
                   />
+                  {error && (
+                    <div className="text-red-500 text-xs mt-2" role="alert">
+                      {error}
+                    </div>
+                  )}
                 </div>
               </div>
-
               {/* Right Section - Track Listing */}
               <div className="col-span-3">
-                {/* Album Info */}
                 <div className="mb-5">
                   <h1 className="text-xl font-semibold mb-2 flex flex-col">
                     <span>{currentSong.title}</span>
                     <span className="text-gray-600 text-xs font-light leading-none">{currentSong.author}</span>
                   </h1>
                 </div>
-
-                {/* Track List */}
                 <div className="space-y-1 relative">
                   <ScrollArea className="h-[300px] rounded-md border" ref={scrollAreaWrapperRef}>
-                    {topSongs.map((song, index) => (
-                      <div
-                        key={song?.clip_id || index}
-                        onClick={() => handleSongSelect(song)}
-                        className={cn(
-                          'flex items-center justify-between py-3 px-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-200',
-                          currentSong.clip_id === song.clip_id && 'bg-gray-100'
-                        )}
-                      >
-                        <div className="flex items-center gap-4">
-                          <span className="font-semibold w-6">{index + 1}</span>
-                          <span className={cn('text-black font-normal', currentSong.id === song.id && 'font-medium')}>
-                            <div className="flex items-center leading-none">{song.title}</div>
-                            <span className="text-gray-500 text-xs font-light leading-none">{song.author}</span>
-                          </span>
+                    <div role="list">
+                      {topSongs.map((song, index) => (
+                        <div
+                          key={song?.clip_id || index}
+                          onClick={() => handleSongSelect(song)}
+                          className={cn(
+                            'flex items-center justify-between py-3 px-4 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-200',
+                            currentSong.clip_id === song.clip_id && 'bg-gray-100'
+                          )}
+                          role="listitem"
+                          tabIndex={0}
+                          aria-current={currentSong.clip_id === song.clip_id}
+                        >
+                          <div className="flex items-center gap-4">
+                            <span className="font-semibold w-6">{index + 1}</span>
+                            <span className={cn('text-black font-normal', currentSong.id === song.id && 'font-medium')}>
+                              <div className="flex items-center leading-none">{song.title}</div>
+                              <span className="text-gray-500 text-xs font-light leading-none">{song.author}</span>
+                            </span>
+                          </div>
+                          <span className="text-sm text-gray-500 font-light">{song.duration}s</span>
                         </div>
-                        <span className="text-sm text-gray-500 font-light">{song.duration}s</span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </ScrollArea>
                   {isLoadingTopSongs && (
                     <div className="absolute inset-0 flex items-center justify-center bg-white/50">
