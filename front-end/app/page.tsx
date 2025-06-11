@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { getIdeas } from '@/helpers/getIdeas'
-import { Eye, FileText, Heart, Sparkles, Zap } from 'lucide-react'
+import { SignInButton } from '@clerk/nextjs'
+import { Eye, FileText, Heart, Sparkles, User, Zap } from 'lucide-react'
 import Link from 'next/link'
 
 const stats = {
@@ -95,15 +96,17 @@ export default async function Page() {
               <FileText className="h-5 w-5" />
               Recent Content Ideas
             </CardTitle>
-            <Link href="/ideas">
-              <Button variant="outline" size="sm" className="hover:cursor-pointer">
-                View All
-              </Button>
-            </Link>
+            {ideas.length > 0 && (
+              <Link href="/ideas">
+                <Button variant="outline" size="sm" className="hover:cursor-pointer">
+                  View All
+                </Button>
+              </Link>
+            )}
           </CardHeader>
           <CardContent>
             <div className="space-y-4 flex flex-col gap-2">
-              {ideas.map((idea: any) => (
+              {ideas.length > 0 ? ideas.map((idea: any) => (
                 <Link href={`/ideas/${idea.id}`} key={idea.id}>
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center gap-3">
@@ -144,7 +147,16 @@ export default async function Page() {
                     </div>
                   </div>
                 </Link>
-              ))}
+              )) : (
+                <div className="text-center text-xl flex items-center justify-center h-full">
+                  <div className="flex flex-col items-center justify-center gap-2 pb-10">
+                    <h1 className="text-2xl font-bold">Welcome to ClipLab</h1>
+                    <p className=" text-muted-foreground">
+                      Sign in to get started
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

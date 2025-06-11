@@ -19,7 +19,7 @@ export default function Header() {
             <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
               <Brain className="h-6 w-6 text-primary-foreground" />
             </div>
-            CreatorCompanion
+            ClipLab
           </h1>
         </Link>
       </div>

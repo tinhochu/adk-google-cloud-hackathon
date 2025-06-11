@@ -205,12 +205,12 @@ export function MusicPlayer({ music, guessCountry = 'US', genres = 'Pop' }: Musi
             <TabsTrigger value="spotify">Spotify</TabsTrigger>
           </TabsList>
           <TabsContent value="tiktok">
-            <div className="grid grid-cols-4 gap-4">
-              <div className="col-span-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+              <div className="col-span-1 lg:col-span-4">
                 <CountrySelector value={country} onValueChange={setCountry} isLoading={isLoadingTopSongs} />
               </div>
               {/* Left Section - Album Art and Controls */}
-              <div className="col-span-1 flex flex-col">
+              <div className="col-span-1 lg:col-span-1 flex flex-col">
                 <div className="flex-1 flex flex-col gap-4">
                   <div className="overflow-hidden rounded-lg">
                     <div className="w-full h-full relative overflow-hidden">
@@ -275,7 +275,7 @@ export function MusicPlayer({ music, guessCountry = 'US', genres = 'Pop' }: Musi
                 </div>
               </div>
               {/* Right Section - Track Listing */}
-              <div className="col-span-3">
+              <div className="col-span-1 lg:col-span-3">
                 <div className="mb-5">
                   <h1 className="text-xl font-semibold mb-2 flex flex-col">
                     <span>{currentSong.title}</span>

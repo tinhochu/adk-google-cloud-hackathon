@@ -35,8 +35,8 @@ function ScriptSectionLoading({ idea }: { idea: any }) {
   const parsedScenes = parseScript(idea?.generated_script || '')
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      <div className="col-span-3">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="col-span-1 lg:col-span-3">
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">💭 Prompt</CardTitle>
@@ -55,7 +55,7 @@ function ScriptSectionLoading({ idea }: { idea: any }) {
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="grid grid-cols-4 gap-4">
+          <CardContent className="grid grid-cols-1 lg:grid-cols-4 gap-4">
             {/* Left Section - Album Art and Controls */}
             <div className="col-span-1 flex flex-col">
               <Skeleton className="w-full aspect-square rounded-lg mb-4" />
@@ -67,7 +67,7 @@ function ScriptSectionLoading({ idea }: { idea: any }) {
             </div>
 
             {/* Right Section - Track Listing */}
-            <div className="col-span-3">
+            <div className="col-span-1 lg:col-span-3">
               {/* Album Info */}
               <div className="mb-5">
                 <Skeleton className="w-full h-10" />
@@ -112,7 +112,7 @@ function ScriptSectionLoading({ idea }: { idea: any }) {
 
         <Caption caption={generated_caption} />
       </div>
-      <div className="col-span-1">
+      <div className="col-span-1 lg:col-span-1">
         <PhoneSimulator />
       </div>
     </div>
@@ -183,8 +183,8 @@ async function ScriptSection({ idea }: { idea: any }) {
   }
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      <div className="col-span-3">
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+      <div className="col-span-1 lg:col-span-3">
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">💭 Prompt</CardTitle>
@@ -226,8 +226,8 @@ async function ScriptSection({ idea }: { idea: any }) {
 
         <Caption caption={generated_caption} gptEffect={false} />
       </div>
-      <div className="col-span-1">
-        <div className="sticky top-4">
+      <div className="col-span-1 lg:col-span-1">
+        <div className="lg:sticky lg:top-4">
           <PhoneSimulator images={sceneImages.filter((img): img is string => typeof img === 'string')} />
         </div>
       </div>

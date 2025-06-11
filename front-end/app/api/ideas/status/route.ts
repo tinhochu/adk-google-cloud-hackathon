@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const { ideaId } = await request.json()
 
+    console.log('ideaId', ideaId)
     const idea = await Idea.findById(ideaId)
 
     if (!idea) return NextResponse.json({ error: 'Idea not found' }, { status: 404 })

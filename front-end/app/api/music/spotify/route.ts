@@ -41,25 +41,24 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    const playlistData = await playlistResponse.json()
-
     if (!playlistResponse.ok) {
       const error = await playlistResponse.json()
       return NextResponse.json({ error }, { status: playlistResponse.status })
     }
 
+    const playlistData = await playlistResponse.json()
+
     if (playlistData.playlists.items.length === 0) {
-      return NextResponse.json({ error: 'No playlists found' }, { status: 404 })
+
+      return NextResponse.json({ error: 'playlist_not_found', message: 'No playlists found' }, { status: 404 })
     }
 
     // get the playlist
     const playlist = playlistData.playlists.items[0]
 
     if (!playlist) {
-      return NextResponse.json({ error: 'No playlist found' }, { status: 404 })
+      return NextResponse.json({ error: 'playlist_not_found', message: 'No playlist found' }, { status: 404 })
     }
-
-    console.log({ playlist })
 
     // get the tracks
     const tracksResponse = await fetch(`https://api.spotify.com/v1/playlists/${playlist?.id}/tracks`, {
