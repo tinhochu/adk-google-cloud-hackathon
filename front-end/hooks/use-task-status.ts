@@ -11,7 +11,7 @@ export function useTaskStatus(ideaId: string) {
     const fetchStatus = async () => {
       try {
         setLoading(true)
-        const res = await apiClient.post('/api/ideas/status', { ideaId })
+        const res = await apiClient.post('/ideas/status', { ideaId })
         if (isMounted) {
           setStatus(res.data.status)
         }
