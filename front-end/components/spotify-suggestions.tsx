@@ -35,16 +35,15 @@ export function SpotifySuggestions({ genres, playlistName = 'Spotify Suggestions
 
         if (data.error === 'playlist_not_found') {
           setTracks([])
-          setIsFetched(true)
-          return
+        } else {
+          setTracks(data.tracks)
         }
-
-        setTracks(data.tracks)
       } catch (e) {
         setTracks([])
       }
 
       setLoading(false)
+      setIsFetched(true)
     }
     fetchTracks()
   }, [genres])
@@ -105,11 +104,7 @@ export function SpotifySuggestions({ genres, playlistName = 'Spotify Suggestions
     )
   }
 
-  if (!tracks.length && isFetched) {
-    return <div className="text-white p-8">No suggestions found.</div>
-  }
-
-  if (tracks.length === 0 && isFetched) {
+  if (!loading && isFetched && tracks.length === 0) {
     return <div className="text-white p-8">No suggestions found.</div>
   }
 
