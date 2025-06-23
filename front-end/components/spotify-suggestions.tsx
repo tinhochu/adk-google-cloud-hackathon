@@ -22,17 +22,28 @@ interface SpotifySuggestionsProps {
 
 export function SpotifySuggestions({ genres, playlistName = 'Spotify Suggestions' }: SpotifySuggestionsProps) {
   const [tracks, setTracks] = useState<Track[]>([])
+  const [isFetched, setIsFetched] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchTracks = async () => {
+      setIsFetched(false)
       setLoading(true)
+
       try {
         const { data } = await apiClient.post('/music/spotify', { genres })
+
+        if (data.error === 'playlist_not_found') {
+          setTracks([])
+          setIsFetched(true)
+          return
+        }
+
         setTracks(data.tracks)
       } catch (e) {
         setTracks([])
       }
+
       setLoading(false)
     }
     fetchTracks()
@@ -94,7 +105,11 @@ export function SpotifySuggestions({ genres, playlistName = 'Spotify Suggestions
     )
   }
 
-  if (!tracks.length) {
+  if (!tracks.length && isFetched) {
+    return <div className="text-white p-8">No suggestions found.</div>
+  }
+
+  if (tracks.length === 0 && isFetched) {
     return <div className="text-white p-8">No suggestions found.</div>
   }
 
